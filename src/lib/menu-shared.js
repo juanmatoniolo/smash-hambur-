@@ -1,5 +1,5 @@
 // Normalización de datos de la base. Sin dependencias de runtime: sirve en server, cliente y OG.
-import { CATEGORIES, categoryOf, MAX_MEATS, MIN_MEATS } from "./site";
+import { CATEGORIES, categoryOf, MAX_MEATS, MEAT_PRICE_KEYS, MIN_MEATS } from "./site";
 
 function str(v, max = 500) {
   return typeof v === "string" ? v.trim().slice(0, max) : "";
@@ -33,6 +33,7 @@ export function normalizeProduct(id, raw) {
     imagen: safeImage(r.imagen),
     // 0 = no se eligen carnes. Las hamburguesas sin dato arrancan en 1.
     medallones: categoria === "bebidas" ? 0 : medOk ? med : categoria === "hamburguesas" ? MIN_MEATS : 0,
+    precios: Object.fromEntries(Object.values(MEAT_PRICE_KEYS).map((k) => [k, num(r.precios?.[k])])),
     oculto: Boolean(r.oculto),
   };
 }
@@ -48,7 +49,6 @@ export function normalizeProducts(raw) {
 export function normalizeDatos(raw) {
   const r = raw && typeof raw === "object" ? raw : {};
   const costo = r.costoEnvio;
-  const extras = r.extras && typeof r.extras === "object" ? r.extras : {};
   const redes = r.redes && typeof r.redes === "object" ? r.redes : {};
   return {
     nombre: str(r.nombre, 80),
@@ -56,7 +56,6 @@ export function normalizeDatos(raw) {
     direccion: str(r.direccion, 160),
     alias: str(r.alias, 60),
     costoEnvio: costo === null || costo === undefined || costo === "" || !Number.isFinite(Number(costo)) ? null : num(costo),
-    extras: { medallon: num(extras.medallon) },
     redes: { instagram: str(redes.instagram, 120), facebook: str(redes.facebook, 160) },
   };
 }

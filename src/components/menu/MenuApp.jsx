@@ -59,11 +59,10 @@ export default function MenuApp({ data, spotlightId = null, footer = true }) {
 
       {footer ? <SiteFooter datos={datos} /> : null}
 
-      <CartBar productos={productos} datos={datos} />
+      <CartBar productos={productos} />
 
       <ProductSheet
         product={selected}
-        datos={datos}
         onClose={() => setSelected(null)}
         onAdded={(p, qty) => setToast(`Agregaste ${qty > 1 ? `${qty} x ` : ""}${p.nombre}`)}
       />

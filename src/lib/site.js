@@ -88,13 +88,33 @@ export function categoryLabel(id) {
 
 /* ---------------- Personalización del rubro ---------------- */
 
-// Carnes (medallones): cualquier producto con `medallones` cargado (1 a 5) deja elegir la cantidad.
-// Las hamburguesas siempre dejan elegir (sin dato, base 1). El precio incluye la base y cada
-// carne extra suma datos.extras.medallon. La base máxima es 4 para que siempre haya algo que elegir.
+// Carnes (medallones): cualquier producto con `medallones` cargado (1 a 4) deja elegir la cantidad.
+// Las hamburguesas siempre dejan elegir (sin dato, base 1). El precio cargado es el de la base y
+// cada opción suma la diferencia de MEAT_SURCHARGE. La base máxima es 3 para que haya algo que elegir.
 export const MIN_MEATS = 1;
-export const MAX_MEATS = 5;
+export const MAX_MEATS = 4;
 export const MAX_BASE_MEATS = MAX_MEATS - 1;
-export const MEAT_LABELS = { 1: "Simple", 2: "Doble", 3: "Triple", 4: "Cuádruple", 5: "Quíntuple" };
+export const MEAT_LABELS = { 1: "Simple", 2: "Doble", 3: "Triple", 4: "Cuádruple" };
+// Recargo sobre el precio de 1 carne, para productos sin precio propio en `precios`.
+export const MEAT_SURCHARGE = { 1: 0, 2: 3000, 3: 5000, 4: 7000 };
+// Claves de `precios` en la base. Con texto y no números para que Firebase no lo convierta en array.
+export const MEAT_PRICE_KEYS = { 2: "doble", 3: "triple", 4: "cuadruple" };
+
+export function includesFries(product) {
+  return product?.categoria === "hamburguesas";
+}
+
+/* ---------------- Medios de pago ---------------- */
+
+export const PAYMENT_METHODS = [
+  { id: "efectivo", label: "Efectivo" },
+  { id: "transferencia", label: "Transferencia" },
+  { id: "tarjeta", label: "Tarjeta" },
+];
+
+export function paymentLabel(id) {
+  return PAYMENT_METHODS.find((m) => m.id === id)?.label || "Efectivo";
+}
 
 function validMeats(n) {
   return Number.isInteger(n) && n >= MIN_MEATS && n <= MAX_MEATS;
@@ -127,13 +147,16 @@ export function unitPrice(p) {
 }
 
 /** Precio unitario de una línea con sus opciones. */
-export function linePrice(product, options = {}, datos = {}) {
+export function linePrice(product, options = {}) {
   let price = unitPrice(product);
   if (isCustomizable(product)) {
     const base = baseMeats(product);
     const meats = clampMeats(options.meats ?? base, base);
-    const extra = Number(datos?.extras?.medallon) || 0;
-    price += Math.max(0, meats - base) * extra;
+    if (meats === base) return price;
+    const own = Number(product.precios?.[MEAT_PRICE_KEYS[meats]]);
+    // Con oferta, el precio propio mantiene el mismo descuento en pesos que el precio base.
+    if (own > 0) return Math.max(0, own - (Number(product.valor) - price));
+    price += MEAT_SURCHARGE[meats] - MEAT_SURCHARGE[base];
   }
   return price;
 }

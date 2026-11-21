@@ -43,6 +43,12 @@
             "valorOferta": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000" },
             "imagen": { ".validate": "newData.isString() && newData.val().length <= 2000 && (newData.val() === '' || newData.val().beginsWith('https:'))" },
             "medallones": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5" },
+            "precios": {
+              "doble": { ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= 100000000" },
+              "triple": { ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= 100000000" },
+              "cuadruple": { ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= 100000000" },
+              "$otro": { ".validate": false }
+            },
             "oculto": { ".validate": "newData.isBoolean()" },
             "$otro": { ".validate": false }
           }

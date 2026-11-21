@@ -1,5 +1,5 @@
 "use client";
-import { SITE_NAME, formatPrice, hasOffer, productPath, unitPrice } from "@/lib/site";
+import { SITE_NAME, formatPrice, hasOffer, includesFries, productPath, unitPrice } from "@/lib/site";
 import ShareButton from "@/components/ui/ShareButton";
 import ProductImage from "./ProductImage";
 import s from "./menu.module.css";
@@ -30,6 +30,7 @@ export default function ProductRow({ product, onOpen }) {
           </button>
         </h3>
         {product.descripcion ? <p className={s.rowDesc}>{product.descripcion}</p> : null}
+        {includesFries(product) ? <p className={s.fries}>Incluye papas fritas</p> : null}
         <div className={s.rowMeta}>
           <Price product={product} />
           {hasOffer(product) ? <span className={s.badge}>Oferta</span> : null}

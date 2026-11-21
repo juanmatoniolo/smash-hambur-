@@ -1,0 +1,122 @@
+{
+  "-P6wNvWCb7vNcvuiDZvG": null,
+  "-P6wNvdIjmaMFA_IfVXh": null,
+  "-P6wNvgfyfG-DaUTb6rU": null,
+  "-P6wNvkB69Qk8q01Y8h8": null,
+  "-P6wNvnWNQSh6JtwBIqO": null,
+  "-P6wNvr5GBO-cfxoBHt6": null,
+  "-P6wNvuP9THWrvBT5wN3": null,
+  "-P6wNvyEeOE6xaE4XBW7": null,
+  "cheeseburger": {
+    "nombre": "Cheeseburger",
+    "descripcion": "Pan brioche, salsa Staker, carne 100% tapa de asado, cheddar.",
+    "categoria": "hamburguesas",
+    "valor": 8500,
+    "oferta": false,
+    "valorOferta": 0,
+    "imagen": "",
+    "medallones": 1,
+    "precios": {
+      "doble": 12500,
+      "triple": 15000,
+      "cuadruple": 16800
+    },
+    "oculto": false
+  },
+  "bacon-extreme": {
+    "nombre": "Bacon Extreme",
+    "descripcion": "Pan brioche, salsa Staker, BBQ, carne 100% tapa de asado, cheddar, panceta crocante.",
+    "categoria": "hamburguesas",
+    "valor": 11500,
+    "oferta": false,
+    "valorOferta": 0,
+    "imagen": "",
+    "medallones": 1,
+    "precios": {
+      "doble": 14000,
+      "triple": 17000,
+      "cuadruple": 19000
+    },
+    "oculto": false
+  },
+  "american": {
+    "nombre": "American",
+    "descripcion": "Pan brioche, salsa Staker, carne 100% tapa de asado, cheddar, lechuga repollada, tomate.",
+    "categoria": "hamburguesas",
+    "valor": 10500,
+    "oferta": false,
+    "valorOferta": 0,
+    "imagen": "",
+    "medallones": 1,
+    "precios": {
+      "doble": 13500,
+      "triple": 15000,
+      "cuadruple": 17000
+    },
+    "oculto": false
+  },
+  "onion-oklahoma": {
+    "nombre": "Onion Oklahoma",
+    "descripcion": "Pan brioche, mostaza, carne 100% tapa de asado, cheddar, cebolla, pepinillos.",
+    "categoria": "hamburguesas",
+    "valor": 10500,
+    "oferta": false,
+    "valorOferta": 0,
+    "imagen": "",
+    "medallones": 1,
+    "precios": {
+      "doble": 13500,
+      "triple": 15000,
+      "cuadruple": 17000
+    },
+    "oculto": false
+  },
+  "crispy": {
+    "nombre": "Crispy con queso cheddar",
+    "descripcion": "Pan brioche, salsa Staker, BBQ, bacon, cebolla crispy, cheddar, carne 100% tapa de asado.",
+    "categoria": "hamburguesas",
+    "valor": 12000,
+    "oferta": false,
+    "valorOferta": 0,
+    "imagen": "",
+    "medallones": 1,
+    "precios": {
+      "doble": 15000,
+      "triple": 18000,
+      "cuadruple": 20000
+    },
+    "oculto": false
+  },
+  "la-argenta": {
+    "nombre": "La Argenta",
+    "descripcion": "Pan brioche, mayonesa de chimichurri, cebolla morada, lechuga, carne 100% tapa de asado, el mix de 1000 granos.",
+    "categoria": "hamburguesas",
+    "valor": 9500,
+    "oferta": false,
+    "valorOferta": 0,
+    "imagen": "",
+    "medallones": 1,
+    "precios": {
+      "doble": 13000,
+      "triple": 16000,
+      "cuadruple": 17500
+    },
+    "oculto": false
+  },
+  "la-toro": {
+    "nombre": "La Toro",
+    "descripcion": "Pan brioche especial, salsa especial, carne 100% tapa de asado, cheddar, panceta, huevo, pepinillos.",
+    "categoria": "hamburguesas",
+    "valor": 12000,
+    "oferta": false,
+    "valorOferta": 0,
+    "imagen": "",
+    "medallones": 1,
+    "precios": {
+      "doble": 14000,
+      "triple": 17000,
+      "cuadruple": 19000
+    },
+    "oculto": false
+  }
+}

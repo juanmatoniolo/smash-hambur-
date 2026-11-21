@@ -21,7 +21,6 @@ export default function DatosForm() {
           direccion: d.direccion || "",
           alias: d.alias || "",
           costoEnvio: d.costoEnvio === null || d.costoEnvio === undefined ? "" : String(d.costoEnvio),
-          extras: { medallon: d.extras?.medallon ? String(d.extras.medallon) : "" },
           redes: { instagram: d.redes?.instagram || "", facebook: d.redes?.facebook || "" },
         })
       )
@@ -31,8 +30,7 @@ export default function DatosForm() {
   if (!form) return status.error ? <p className="error-text">{status.error}</p> : <Loading />;
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
-  const setNested = (g, k, digits = false) => (e) =>
-    setForm((f) => ({ ...f, [g]: { ...f[g], [k]: digits ? e.target.value.replace(/\D/g, "").slice(0, 9) : e.target.value } }));
+  const setNested = (g, k) => (e) => setForm((f) => ({ ...f, [g]: { ...f[g], [k]: e.target.value } }));
   const wa = waNumber(form.whatsapp);
 
   async function submit(e) {
@@ -84,10 +82,6 @@ export default function DatosForm() {
             placeholder="Vacío = a confirmar"
           />
           <span className="hint">En la carta: {envioLabel(form.costoEnvio)}. Vacío = a confirmar, 0 = gratis.</span>
-        </label>
-        <label className="field">
-          <span>Precio de cada medallón extra ($)</span>
-          <input className="input" inputMode="numeric" value={form.extras.medallon} onChange={setNested("extras", "medallon", true)} placeholder="0" />
         </label>
       </fieldset>
 

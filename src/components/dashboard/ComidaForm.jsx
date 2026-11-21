@@ -5,7 +5,7 @@ import { Trash2 } from "lucide-react";
 import Loading from "@/components/Loading";
 import { deleteComida, getComida, saveComida } from "@/lib/admin-data";
 import { authError } from "@/lib/session";
-import { CATEGORIES, MAX_BASE_MEATS, MAX_MEATS, MIN_MEATS, meatLabel } from "@/lib/site";
+import { CATEGORIES, MAX_BASE_MEATS, MAX_MEATS, MEAT_PRICE_KEYS, MIN_MEATS, meatLabel } from "@/lib/site";
 import { useDashboard } from "./DashboardShell";
 import ImageUploader from "./ImageUploader";
 import PublishPreview from "./PublishPreview";
@@ -20,6 +20,7 @@ const EMPTY = {
   valorOferta: "",
   imagen: "",
   medallones: 1,
+  precios: { doble: "", triple: "", cuadruple: "" },
   oculto: false,
 };
 
@@ -42,7 +43,7 @@ export default function ComidaForm({ id = null }) {
           setNotFound(true);
           return;
         }
-        setForm({ ...EMPTY, ...c, medallones: Number(c.medallones) || (c.categoria === "hamburguesas" ? 1 : 0), valor: String(c.valor ?? ""), valorOferta: c.valorOferta ? String(c.valorOferta) : "" });
+        setForm({ ...EMPTY, ...c, medallones: Number(c.medallones) || (c.categoria === "hamburguesas" ? 1 : 0), valor: String(c.valor ?? ""), valorOferta: c.valorOferta ? String(c.valorOferta) : "", precios: { doble: String(c.precios?.doble ?? ""), triple: String(c.precios?.triple ?? ""), cuadruple: String(c.precios?.cuadruple ?? "") } });
         setOriginal(c.imagen || "");
       })
       .catch((e) => alive && setError(authError(e)));
@@ -62,6 +63,10 @@ export default function ComidaForm({ id = null }) {
   const set = (k) => (v) => setForm((f) => ({ ...f, [k]: v }));
   const onInput = (k) => (e) => set(k)(e.target.type === "checkbox" ? e.target.checked : e.target.value);
   const numeric = (k) => (e) => set(k)(e.target.value.replace(/\D/g, "").slice(0, 9));
+  const setMeatPrice = (k) => (e) => {
+    const value = e.target.value.replace(/\D/g, "").slice(0, 9);
+    setForm((f) => ({ ...f, precios: { ...f.precios, [k]: value } }));
+  };
 
   const offerInvalid = form.oferta && !(Number(form.valorOferta) > 0 && Number(form.valorOferta) < Number(form.valor));
 
@@ -146,10 +151,26 @@ export default function ComidaForm({ id = null }) {
             </select>
             <span className="hint">
               {meatsValue > 0
-                ? `El cliente elige de ${meatsValue} a ${MAX_MEATS} carnes. Cada carne extra suma el precio del medallón que cargás en Datos.`
+                ? `El cliente elige de ${meatsValue} a ${MAX_MEATS} carnes. El precio de arriba es el de ${meatLabel(meatsValue).toLowerCase()}.`
                 : "El cliente no elige cantidad de carnes en este producto."}
             </span>
           </label>
+        ) : null}
+
+        {form.categoria !== "bebidas" && meatsValue > 0 ? (
+          <div className="field">
+            <div className={s.row2}>
+              {Object.entries(MEAT_PRICE_KEYS)
+                .filter(([n]) => Number(n) > meatsValue)
+                .map(([n, k]) => (
+                  <label key={k} className="field">
+                    <span>Precio {meatLabel(Number(n)).toLowerCase()} ($)</span>
+                    <input className="input" inputMode="numeric" value={form.precios[k]} onChange={setMeatPrice(k)} placeholder="Automático" />
+                  </label>
+                ))}
+            </div>
+            <span className="hint">Total final de cada opción. Vacío = se calcula con +$3.000, +$5.000 y +$7.000 sobre 1 carne.</span>
+          </div>
         ) : null}
 
         <div className={s.toggleBox}>

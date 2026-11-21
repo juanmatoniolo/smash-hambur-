@@ -26,7 +26,7 @@ const EMPTY_BUYER = {
 export default function CheckoutApp({ data }) {
   const { productos, datos, horarios } = data;
   const items = useCart();
-  const { lines, subtotal, count } = priceCart(items, productos, datos);
+  const { lines, subtotal, count } = priceCart(items, productos);
   const status = useOpenStatus(horarios);
   const [buyer, setBuyer] = useState(EMPTY_BUYER);
   const [errors, setErrors] = useState({});

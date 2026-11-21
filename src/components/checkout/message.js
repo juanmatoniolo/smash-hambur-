@@ -1,4 +1,4 @@
-import { SITE_NAME, envioLabel, formatPrice, fullAddress, isCustomizable, meatLabel } from "@/lib/site";
+import { SITE_NAME, envioLabel, formatPrice, fullAddress, includesFries, isCustomizable, meatLabel, paymentLabel } from "@/lib/site";
 
 /**
  * Mensaje de WhatsApp en texto plano con negritas (*...*).
@@ -19,7 +19,7 @@ export function buildOrderMessage({ datos, lines, subtotal, buyer }) {
     out.push(`*Dirección:* ${fullAddress(buyer.direccion.trim())}`);
     if (buyer.referencia.trim()) out.push(`*Referencia:* ${buyer.referencia.trim()}`);
   }
-  out.push(`*Pago:* ${buyer.pago === "transferencia" ? "Transferencia" : "Efectivo"}`);
+  out.push(`*Pago:* ${paymentLabel(buyer.pago)}`);
   if (buyer.pago === "efectivo" && buyer.pagaCon && Number(buyer.pagaCon) > 0) {
     out.push(`*Paga con:* ${formatPrice(buyer.pagaCon)}`);
   }
@@ -28,6 +28,7 @@ export function buildOrderMessage({ datos, lines, subtotal, buyer }) {
   for (const l of lines) {
     out.push(`${l.qty} x ${l.product.nombre}: ${formatPrice(l.total)}`);
     if (isCustomizable(l.product) && l.meats) out.push(`   - ${meatLabel(l.meats)}`);
+    if (includesFries(l.product)) out.push("   - Con papas fritas");
     if (l.nota) out.push(`   - Aclaración: ${l.nota}`);
   }
   out.push("");

@@ -5,7 +5,7 @@ import { createUserWithEmailAndPassword, getAuth, inMemoryPersistence, sendPassw
 import { get, push, ref, remove, set, update } from "firebase/database";
 import { firebaseConfig, getAuthClient, getDb } from "./firebase";
 import { idToken } from "./session";
-import { CATEGORIES, MAX_BASE_MEATS, MIN_MEATS, categoryOf } from "./site";
+import { CATEGORIES, MAX_BASE_MEATS, MEAT_PRICE_KEYS, MIN_MEATS, categoryOf } from "./site";
 import { MAX_FRANJAS, WEEK_ORDER, isHHMM } from "@/utils/horarios";
 
 export const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/;
@@ -40,6 +40,15 @@ export function cleanComida(raw) {
   const medOk = Number.isInteger(med) && med >= MIN_MEATS && med <= MAX_BASE_MEATS;
   if (categoria === "hamburguesas") out.medallones = medOk ? med : MIN_MEATS;
   else if (categoria !== "bebidas" && medOk) out.medallones = med;
+  // Precios propios por cantidad de carnes: solo las opciones por encima de la base.
+  if (out.medallones) {
+    const precios = {};
+    for (const [n, k] of Object.entries(MEAT_PRICE_KEYS)) {
+      const v = money(raw.precios?.[k]);
+      if (Number(n) > out.medallones && v > 0) precios[k] = v;
+    }
+    if (Object.keys(precios).length) out.precios = precios;
+  }
   return out;
 }
 
@@ -96,7 +105,6 @@ export function cleanDatos(raw) {
     direccion: txt(raw.direccion, 160),
     alias: txt(raw.alias, 60),
     costoEnvio: costo === "" ? null : money(costo),
-    extras: { medallon: money(raw.extras?.medallon) },
     redes: { instagram: txt(raw.redes?.instagram, 120), facebook: txt(raw.redes?.facebook, 160) },
   };
 }

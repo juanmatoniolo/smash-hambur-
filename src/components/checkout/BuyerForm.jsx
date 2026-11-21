@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Banknote, Bike, Check, Copy, Landmark, Store } from "lucide-react";
+import { Banknote, Bike, Check, Copy, CreditCard, Landmark, Store } from "lucide-react";
 import { envioLabel } from "@/lib/site";
 import s from "./checkout.module.css";
 
@@ -122,6 +122,7 @@ export default function BuyerForm({ buyer, setBuyer, datos, errors }) {
             icon={Landmark}
             title="Transferencia"
           />
+          <Choice name="pago" value="tarjeta" checked={buyer.pago === "tarjeta"} onChange={set("pago")} icon={CreditCard} title="Tarjeta" />
         </div>
       </fieldset>
 

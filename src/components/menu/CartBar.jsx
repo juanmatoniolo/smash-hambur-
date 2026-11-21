@@ -2,11 +2,11 @@
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 import { useCart } from "@/lib/cart";
-import { formatPrice, linePrice } from "@/lib/site";
+import { baseMeats, clampMeats, formatPrice, isCustomizable, linePrice } from "@/lib/site";
 import s from "./menu.module.css";
 
 /** Totales del carrito con precios del servidor. Ignora productos que ya no existen. */
-export function priceCart(items, productos, datos) {
+export function priceCart(items, productos) {
   const byId = new Map(productos.filter((p) => !p.oculto).map((p) => [p.id, p]));
   let count = 0;
   let subtotal = 0;
@@ -14,17 +14,20 @@ export function priceCart(items, productos, datos) {
   for (const it of items) {
     const product = byId.get(it.id);
     if (!product) continue;
-    const unit = linePrice(product, { meats: it.meats }, datos);
+    // Un carrito guardado puede traer una cantidad de carnes que ya no existe.
+    const base = baseMeats(product);
+    const meats = isCustomizable(product) ? clampMeats(it.meats ?? base, base) : null;
+    const unit = linePrice(product, { meats });
     count += it.qty;
     subtotal += unit * it.qty;
-    lines.push({ ...it, product, unit, total: unit * it.qty });
+    lines.push({ ...it, meats, product, unit, total: unit * it.qty });
   }
   return { count, subtotal, lines };
 }
 
-export default function CartBar({ productos, datos }) {
+export default function CartBar({ productos }) {
   const items = useCart();
-  const { count, subtotal } = priceCart(items, productos, datos);
+  const { count, subtotal } = priceCart(items, productos);
   if (count === 0) return null;
 
   return (

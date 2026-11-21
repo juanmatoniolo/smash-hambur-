@@ -9,6 +9,7 @@ import {
   SITE_NAME,
   baseMeats,
   formatPrice,
+  includesFries,
   isCustomizable,
   linePrice,
   meatLabel,
@@ -18,15 +19,14 @@ import ProductImage from "./ProductImage";
 import { Price } from "./ProductRow";
 import s from "./menu.module.css";
 
-function ProductForm({ product, datos, onAdded }) {
+function ProductForm({ product, onAdded }) {
   const custom = isCustomizable(product);
   const base = baseMeats(product);
-  const extra = Number(datos?.extras?.medallon) || 0;
   const [meats, setMeats] = useState(base);
   const [qty, setQty] = useState(1);
   const [nota, setNota] = useState("");
 
-  const unit = linePrice(product, { meats }, datos);
+  const unit = linePrice(product, { meats });
   const total = unit * qty;
 
   function add() {
@@ -47,21 +47,19 @@ function ProductForm({ product, datos, onAdded }) {
         <Price product={product} big />
       </div>
       {product.descripcion ? <p className={s.sheetDesc}>{product.descripcion}</p> : null}
+      {includesFries(product) ? <p className={s.fries}>Incluye papas fritas</p> : null}
 
       {custom && meatOptions.length > 1 ? (
         <fieldset className={s.optGroup}>
           <legend className={s.optLegend}>Cantidad de carnes</legend>
           <div className={s.optList}>
-            {meatOptions.map((n) => {
-              const plus = (n - base) * extra;
-              return (
-                <label key={n} className={s.opt}>
-                  <input type="radio" name="meats" value={n} checked={meats === n} onChange={() => setMeats(n)} />
-                  <span className={s.optLabel}>{meatLabel(n)}</span>
-                  <span className={s.optPrice}>{plus > 0 ? `+ ${formatPrice(plus)}` : n === base ? "Incluido" : ""}</span>
-                </label>
-              );
-            })}
+            {meatOptions.map((n) => (
+              <label key={n} className={s.opt}>
+                <input type="radio" name="meats" value={n} checked={meats === n} onChange={() => setMeats(n)} />
+                <span className={s.optLabel}>{meatLabel(n)}</span>
+                <span className={s.optPrice}>{formatPrice(linePrice(product, { meats: n }))}</span>
+              </label>
+            ))}
           </div>
         </fieldset>
       ) : null}
@@ -92,14 +90,13 @@ function ProductForm({ product, datos, onAdded }) {
   );
 }
 
-export default function ProductSheet({ product, datos, onClose, onAdded }) {
+export default function ProductSheet({ product, onClose, onAdded }) {
   return (
     <Sheet open={Boolean(product)} onClose={onClose} title={product?.nombre || "Producto"} hideTitle>
       {product ? (
         <ProductForm
           key={product.id}
           product={product}
-          datos={datos}
           onAdded={(qty) => {
             onAdded?.(product, qty);
             onClose();

@@ -368,6 +368,12 @@
   color: var(--text-muted);
 }
 
+.fries {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
 .optGroup {
   border: 0;
   margin: 20px 0 6px;
