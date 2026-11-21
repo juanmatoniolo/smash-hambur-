@@ -12,7 +12,7 @@ import {
   isCustomizable,
   linePrice,
   meatLabel,
-  productUrl,
+  productPath,
 } from "@/lib/site";
 import ProductImage from "./ProductImage";
 import { Price } from "./ProductRow";
@@ -50,7 +50,7 @@ function ProductForm({ product, datos, onAdded }) {
 
       {custom && meatOptions.length > 1 ? (
         <fieldset className={s.optGroup}>
-          <legend className={s.optLegend}>Medallones</legend>
+          <legend className={s.optLegend}>Cantidad de carnes</legend>
           <div className={s.optList}>
             {meatOptions.map((n) => {
               const plus = (n - base) * extra;
@@ -86,7 +86,7 @@ function ProductForm({ product, datos, onAdded }) {
       </div>
 
       <div className={s.shareRow}>
-        <ShareButton text={`Mirá ${product.nombre} en ${SITE_NAME}`} url={productUrl(product.id)} />
+        <ShareButton title={product.nombre} text={`Mirá ${product.nombre} en ${SITE_NAME}`} path={productPath(product.id)} />
       </div>
     </>
   );

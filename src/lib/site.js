@@ -3,7 +3,16 @@
 // Los datos que el dueño edita (WhatsApp, dirección, alias, redes, precios, horarios)
 // viven en Firebase y NUNCA se escriben acá.
 
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/+$/, "");
+// URL pública: NEXT_PUBLIC_SITE_URL si está cargada (dominio propio); si no, el dominio de
+// producción que Vercel expone en el build; en local, localhost. Las imágenes al compartir
+// necesitan una URL absoluta real: con localhost WhatsApp no muestra la vista previa.
+function resolveSiteUrl() {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+  const vercel = process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (vercel) return `https://${vercel}`;
+  return "http://localhost:3000";
+}
+export const SITE_URL = resolveSiteUrl().replace(/\/+$/, "");
 export const SITE_NAME = "Smash Burger El Toro";
 export const SITE_SHORT_NAME = "El Toro";
 export const SITE_CITY = "Chajarí";
@@ -76,18 +85,26 @@ export function categoryLabel(id) {
 
 /* ---------------- Personalización del rubro ---------------- */
 
-// Medallones: cada producto tiene una base (por defecto 1); cada medallón extra suma datos.extras.medallon.
+// Carnes (medallones): cualquier producto con `medallones` cargado (1 a 5) deja elegir la cantidad.
+// Las hamburguesas siempre dejan elegir (sin dato, base 1). El precio incluye la base y cada
+// carne extra suma datos.extras.medallon. La base máxima es 4 para que siempre haya algo que elegir.
 export const MIN_MEATS = 1;
-export const MAX_MEATS = 4;
-export const MEAT_LABELS = { 1: "Simple", 2: "Doble", 3: "Triple", 4: "Cuádruple" };
+export const MAX_MEATS = 5;
+export const MAX_BASE_MEATS = MAX_MEATS - 1;
+export const MEAT_LABELS = { 1: "Simple", 2: "Doble", 3: "Triple", 4: "Cuádruple", 5: "Quíntuple" };
+
+function validMeats(n) {
+  return Number.isInteger(n) && n >= MIN_MEATS && n <= MAX_MEATS;
+}
 
 export function isCustomizable(product) {
-  return product?.categoria === "hamburguesas";
+  if (!product || product.categoria === "bebidas") return false;
+  return product.categoria === "hamburguesas" || validMeats(Number(product.medallones));
 }
 
 export function baseMeats(product) {
   const n = Number(product?.medallones);
-  return Number.isInteger(n) && n >= MIN_MEATS && n <= MAX_MEATS ? n : MIN_MEATS;
+  return validMeats(n) ? n : MIN_MEATS;
 }
 
 export function meatLabel(n) {

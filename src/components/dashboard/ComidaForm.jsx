@@ -5,7 +5,7 @@ import { Trash2 } from "lucide-react";
 import Loading from "@/components/Loading";
 import { deleteComida, getComida, saveComida } from "@/lib/admin-data";
 import { authError } from "@/lib/session";
-import { CATEGORIES, MAX_MEATS, MIN_MEATS, meatLabel } from "@/lib/site";
+import { CATEGORIES, MAX_BASE_MEATS, MAX_MEATS, MIN_MEATS, meatLabel } from "@/lib/site";
 import { useDashboard } from "./DashboardShell";
 import ImageUploader from "./ImageUploader";
 import PublishPreview from "./PublishPreview";
@@ -42,7 +42,7 @@ export default function ComidaForm({ id = null }) {
           setNotFound(true);
           return;
         }
-        setForm({ ...EMPTY, ...c, valor: String(c.valor ?? ""), valorOferta: c.valorOferta ? String(c.valorOferta) : "" });
+        setForm({ ...EMPTY, ...c, medallones: Number(c.medallones) || (c.categoria === "hamburguesas" ? 1 : 0), valor: String(c.valor ?? ""), valorOferta: c.valorOferta ? String(c.valorOferta) : "" });
         setOriginal(c.imagen || "");
       })
       .catch((e) => alive && setError(authError(e)));
@@ -53,6 +53,11 @@ export default function ComidaForm({ id = null }) {
 
   if (notFound) return <p className="hint">Ese producto ya no existe.</p>;
   if (!form) return <Loading />;
+
+  // Base de carnes visible en el selector: en hamburguesas mínimo 1, y nunca más de MAX_BASE_MEATS
+  // (con 5 incluidas el cliente no tendría nada para elegir).
+  const rawMeats = Number(form.medallones) || 0;
+  const meatsValue = Math.min(MAX_BASE_MEATS, form.categoria === "hamburguesas" ? Math.max(MIN_MEATS, rawMeats) : rawMeats);
 
   const set = (k) => (v) => setForm((f) => ({ ...f, [k]: v }));
   const onInput = (k) => (e) => set(k)(e.target.type === "checkbox" ? e.target.checked : e.target.value);
@@ -68,7 +73,7 @@ export default function ComidaForm({ id = null }) {
     setSaving(true);
     setError("");
     try {
-      await saveComida(local, id, form, original);
+      await saveComida(local, id, { ...form, medallones: meatsValue }, original);
       router.push(`/dashboard/${local}`);
     } catch (err) {
       setError(authError(err));
@@ -107,7 +112,14 @@ export default function ComidaForm({ id = null }) {
         <div className={s.row2}>
           <label className="field">
             <span>Categoría</span>
-            <select className="input" value={form.categoria} onChange={onInput("categoria")}>
+            <select
+              className="input"
+              value={form.categoria}
+              onChange={(e) => {
+                const categoria = e.target.value;
+                setForm((f) => ({ ...f, categoria, medallones: categoria === "hamburguesas" ? Math.max(1, Number(f.medallones) || 0) : 0 }));
+              }}
+            >
               {CATEGORIES.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.label}
@@ -121,17 +133,22 @@ export default function ComidaForm({ id = null }) {
           </label>
         </div>
 
-        {form.categoria === "hamburguesas" ? (
+        {form.categoria !== "bebidas" ? (
           <label className="field">
-            <span>Medallones incluidos en el precio</span>
-            <select className="input" value={form.medallones} onChange={(e) => set("medallones")(Number(e.target.value))}>
-              {Array.from({ length: MAX_MEATS - MIN_MEATS + 1 }, (_, i) => i + MIN_MEATS).map((n) => (
+            <span>Carnes incluidas en el precio</span>
+            <select className="input" value={meatsValue} onChange={(e) => set("medallones")(Number(e.target.value))}>
+              {form.categoria !== "hamburguesas" ? <option value={0}>No lleva carne para elegir</option> : null}
+              {Array.from({ length: MAX_BASE_MEATS - MIN_MEATS + 1 }, (_, i) => i + MIN_MEATS).map((n) => (
                 <option key={n} value={n}>
-                  {meatLabel(n)}
+                  {n} ({meatLabel(n)})
                 </option>
               ))}
             </select>
-            <span className="hint">El cliente puede sumar medallones hasta {MAX_MEATS}. El precio del medallón extra se carga en Datos.</span>
+            <span className="hint">
+              {meatsValue > 0
+                ? `El cliente elige de ${meatsValue} a ${MAX_MEATS} carnes. Cada carne extra suma el precio del medallón que cargás en Datos.`
+                : "El cliente no elige cantidad de carnes en este producto."}
+            </span>
           </label>
         ) : null}
 

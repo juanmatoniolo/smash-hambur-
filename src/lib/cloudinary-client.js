@@ -28,7 +28,11 @@ export function uploadImage(blob, local, onProgress) {
       return;
     }
     const form = new FormData();
-    form.append("file", blob);
+    // Nombre único: el preset usa el nombre del archivo y un upload unsigned no puede pisar
+    // uno existente (devuelve la foto vieja). Sin esto todas las fotos se llamaban "blob".
+    const ext = (blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
+    const name = `foto-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    form.append("file", blob, name);
     form.append("upload_preset", PRESET);
     form.append("folder", `${CLOUDINARY_ROOT}/${local}`);
     const xhr = new XMLHttpRequest();

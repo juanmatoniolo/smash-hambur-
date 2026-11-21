@@ -20,16 +20,19 @@ export function normalizeProduct(id, raw) {
   const valor = num(r.valor);
   const valorOferta = num(r.valorOferta);
   const med = Number(r.medallones);
+  const categoria = categoryOf(r.categoria);
+  const medOk = Number.isInteger(med) && med >= MIN_MEATS && med <= MAX_MEATS;
   return {
     id: String(id),
     nombre: str(r.nombre, 80) || "Sin nombre",
     descripcion: str(r.descripcion, 400),
-    categoria: categoryOf(r.categoria),
+    categoria,
     valor,
     oferta: Boolean(r.oferta) && valorOferta > 0 && valorOferta < valor,
     valorOferta,
     imagen: safeImage(r.imagen),
-    medallones: Number.isInteger(med) && med >= MIN_MEATS && med <= MAX_MEATS ? med : MIN_MEATS,
+    // 0 = no se eligen carnes. Las hamburguesas sin dato arrancan en 1.
+    medallones: categoria === "bebidas" ? 0 : medOk ? med : categoria === "hamburguesas" ? MIN_MEATS : 0,
     oculto: Boolean(r.oculto),
   };
 }

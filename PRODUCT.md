@@ -25,7 +25,7 @@ A local smash burger place in Chajarí with its own menu that the owner updates,
 
 ## Capabilities and Constraints
 - Next.js 16 App Router (JavaScript) with Cache Components, CSS Modules + tokens in `globals.css`, Firebase Realtime Database + Auth, Cloudinary for photos.
-- Categories: hamburguesas (shown as "Smash burgers"), papas, bebidas, otros. Burgers carry a base patty count (1 to 4) and customers can add patties up to 4; each extra patty adds the price set in the dashboard (`datos.extras.medallon`).
+- Categories: hamburguesas (shown as "Smash burgers"), papas, bebidas, otros. Burgers carry a base patty count (1 to 5) and customers can add patties up to 5; each extra patty adds the price set in the dashboard (`datos.extras.medallon`).
 - Real address, WhatsApp, alias and social links come from the dashboard. Never hardcode them.
 - Product photos are the owner's real photos (Cloudinary uploads or Google Drive links).
 

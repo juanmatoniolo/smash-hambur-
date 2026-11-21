@@ -442,6 +442,29 @@
   border-top: 1px solid var(--line);
 }
 
+/* Por encima del ::after del botón estirado, para que no abra la ficha. */
+.rowShare {
+  position: relative;
+  z-index: 1;
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: -8px -8px -8px auto;
+  border-radius: 999px;
+  color: var(--text-muted);
+}
+
+.rowShare:hover {
+  color: var(--text);
+  background: var(--surface-3);
+}
+
+.rowShare:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 0;
+}
+
 .shareRow {
   display: flex;
   justify-content: center;

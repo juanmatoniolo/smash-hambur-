@@ -30,7 +30,7 @@ export default function CartLine({ line }) {
 
         {custom && meatOptions.length > 1 ? (
           <div className={s.lineField}>
-            <label htmlFor={meatsId}>Medallones</label>
+            <label htmlFor={meatsId}>Carnes</label>
             <select
               id={meatsId}
               className="input"

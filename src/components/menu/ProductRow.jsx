@@ -1,5 +1,6 @@
 "use client";
-import { formatPrice, hasOffer, unitPrice } from "@/lib/site";
+import { SITE_NAME, formatPrice, hasOffer, productPath, unitPrice } from "@/lib/site";
+import ShareButton from "@/components/ui/ShareButton";
 import ProductImage from "./ProductImage";
 import s from "./menu.module.css";
 
@@ -32,6 +33,13 @@ export default function ProductRow({ product, onOpen }) {
         <div className={s.rowMeta}>
           <Price product={product} />
           {hasOffer(product) ? <span className={s.badge}>Oferta</span> : null}
+          <ShareButton
+            compact
+            title={product.nombre}
+            text={`Mirá ${product.nombre} en ${SITE_NAME}`}
+            path={productPath(product.id)}
+            className={s.rowShare}
+          />
         </div>
       </div>
       <ProductImage src={product.imagen} alt="" width={240} className={s.rowImg} />

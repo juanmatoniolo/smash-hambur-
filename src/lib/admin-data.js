@@ -5,7 +5,7 @@ import { createUserWithEmailAndPassword, getAuth, inMemoryPersistence, sendPassw
 import { get, push, ref, remove, set, update } from "firebase/database";
 import { firebaseConfig, getAuthClient, getDb } from "./firebase";
 import { idToken } from "./session";
-import { CATEGORIES, MAX_MEATS, MIN_MEATS, categoryOf } from "./site";
+import { CATEGORIES, MAX_BASE_MEATS, MIN_MEATS, categoryOf } from "./site";
 import { MAX_FRANJAS, WEEK_ORDER, isHHMM } from "@/utils/horarios";
 
 export const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/;
@@ -36,9 +36,10 @@ export function cleanComida(raw) {
     imagen: /^https:\/\//i.test(imagen) ? imagen : "",
     oculto: Boolean(raw.oculto),
   };
-  if (categoria === "hamburguesas") {
-    out.medallones = Number.isInteger(med) && med >= MIN_MEATS && med <= MAX_MEATS ? med : MIN_MEATS;
-  }
+  // Base de carnes: obligatoria en hamburguesas, opcional en el resto (sin dato = no se eligen).
+  const medOk = Number.isInteger(med) && med >= MIN_MEATS && med <= MAX_BASE_MEATS;
+  if (categoria === "hamburguesas") out.medallones = medOk ? med : MIN_MEATS;
+  else if (categoria !== "bebidas" && medOk) out.medallones = med;
   return out;
 }
 

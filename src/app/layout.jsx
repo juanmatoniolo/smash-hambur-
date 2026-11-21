@@ -34,7 +34,9 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="es-AR" className={`${anton.variable} ${archivo.variable}`}>
-      <body>{children}</body>
+      {/* Extensiones del navegador (ColorZilla, Grammarly, etc.) agregan atributos al body antes
+          de que cargue React. Esto solo ignora diferencias de atributos de este elemento. */}
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }
