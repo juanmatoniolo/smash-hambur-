@@ -7,8 +7,11 @@
 // producción que Vercel expone en el build; en local, localhost. Las imágenes al compartir
 // necesitan una URL absoluta real: con localhost WhatsApp no muestra la vista previa.
 function resolveSiteUrl() {
-  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL || "";
   const vercel = process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  // Si en Vercel quedó cargada la URL de desarrollo (localhost), se ignora: rompería las vistas previas.
+  const isLocal = /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/i.test(explicit);
+  if (explicit && !(isLocal && vercel)) return explicit;
   if (vercel) return `https://${vercel}`;
   return "http://localhost:3000";
 }

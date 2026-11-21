@@ -9,7 +9,7 @@
         "email": { ".validate": "newData.isString() && newData.val().length <= 120" },
         "superadmin": { ".validate": "newData.isBoolean()" },
         "locales": {
-          "$slug": { ".validate": "newData.val() === true && $slug.matches(/^[a-z0-9-]{2,40}$/)" }
+          "$local": { ".validate": "$local.matches(/^[a-z0-9-]{2,60}$/) && newData.isBoolean()" }
         },
         "$otro": { ".validate": false }
       }
@@ -17,12 +17,10 @@
 
     "solicitudes": {
       ".read": "auth != null && root.child('usuarios').child(auth.uid).child('superadmin').val() === true",
-      ".write": "auth != null && root.child('usuarios').child(auth.uid).child('superadmin').val() === true",
       "$uid": {
-        ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && auth.uid === $uid && newData.exists()",
-        ".validate": "newData.hasChildren(['email', 'fecha']) && newData.child('email').val() === auth.token.email",
-        "email": { ".validate": "newData.isString() && newData.val().length <= 120" },
+        ".write": "auth != null && (auth.uid === $uid || root.child('usuarios').child(auth.uid).child('superadmin').val() === true)",
+        ".validate": "!newData.exists() || newData.hasChildren(['email', 'fecha'])",
+        "email": { ".validate": "newData.isString() && newData.val().length <= 120 && (newData.val() === auth.token.email || root.child('usuarios').child(auth.uid).child('superadmin').val() === true)" },
         "nombre": { ".validate": "newData.isString() && newData.val().length <= 80" },
         "fecha": { ".validate": "newData.isNumber()" },
         "$otro": { ".validate": false }
@@ -31,17 +29,14 @@
 
     "locales": {
       ".read": "auth != null && root.child('usuarios').child(auth.uid).child('superadmin').val() === true",
-      ".write": "auth != null && root.child('usuarios').child(auth.uid).child('superadmin').val() === true",
-      "$slug": {
-        ".validate": "$slug.matches(/^[a-z0-9-]{2,40}$/)",
-
+      "$local": {
         "comidas": {
           ".read": true,
-          ".write": "auth != null && (root.child('usuarios').child(auth.uid).child('locales').child($slug).val() === true || root.child('usuarios').child(auth.uid).child('superadmin').val() === true)",
+          ".write": "auth != null && (root.child('usuarios').child(auth.uid).child('locales').child($local).val() === true || root.child('usuarios').child(auth.uid).child('superadmin').val() === true)",
           "$id": {
-            ".validate": "newData.hasChildren(['nombre', 'categoria', 'valor'])",
-            "nombre": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 80" },
-            "descripcion": { ".validate": "newData.isString() && newData.val().length <= 400" },
+            ".validate": "newData.hasChildren(['nombre', 'valor', 'categoria'])",
+            "nombre": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 120" },
+            "descripcion": { ".validate": "newData.isString() && newData.val().length <= 600" },
             "categoria": { ".validate": "newData.isString() && newData.val().length <= 40" },
             "valor": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000" },
             "oferta": { ".validate": "newData.isBoolean()" },
@@ -55,29 +50,28 @@
 
         "datos": {
           ".read": true,
-          ".write": "auth != null && (root.child('usuarios').child(auth.uid).child('locales').child($slug).val() === true || root.child('usuarios').child(auth.uid).child('superadmin').val() === true)",
+          ".write": "auth != null && (root.child('usuarios').child(auth.uid).child('locales').child($local).val() === true || root.child('usuarios').child(auth.uid).child('superadmin').val() === true)",
           "nombre": { ".validate": "newData.isString() && newData.val().length <= 80" },
           "whatsapp": { ".validate": "newData.isString() && newData.val().length <= 30" },
-          "direccion": { ".validate": "newData.isString() && newData.val().length <= 160" },
-          "alias": { ".validate": "newData.isString() && newData.val().length <= 60" },
+          "direccion": { ".validate": "newData.isString() && newData.val().length <= 200" },
+          "alias": { ".validate": "newData.isString() && newData.val().length <= 80" },
           "costoEnvio": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000" },
           "extras": {
             "medallon": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000" },
+            "carne": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000" },
+            "panEspecial": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000" },
             "$otro": { ".validate": false }
           },
           "redes": {
-            "instagram": { ".validate": "newData.isString() && newData.val().length <= 120" },
-            "facebook": { ".validate": "newData.isString() && newData.val().length <= 160" },
-            "$otro": { ".validate": false }
+            "$red": { ".validate": "$red.matches(/^(instagram|facebook|twitter)$/) && newData.isString() && newData.val().length <= 200" }
           },
           "$otro": { ".validate": false }
         },
 
         "horarios": {
           ".read": true,
-          ".write": "auth != null && (root.child('usuarios').child(auth.uid).child('locales').child($slug).val() === true || root.child('usuarios').child(auth.uid).child('superadmin').val() === true)",
+          ".write": "auth != null && (root.child('usuarios').child(auth.uid).child('locales').child($local).val() === true || root.child('usuarios').child(auth.uid).child('superadmin').val() === true)",
           "$dia": {
-            ".validate": "$dia.matches(/^(lunes|martes|miercoles|jueves|viernes|sabado|domingo)$/)",
             "cerrado": { ".validate": "newData.isBoolean()" },
             "franjas": {
               "$i": {
@@ -92,20 +86,18 @@
         },
 
         "visitas": {
-          ".read": "auth != null && (root.child('usuarios').child(auth.uid).child('locales').child($slug).val() === true || root.child('usuarios').child(auth.uid).child('superadmin').val() === true)",
+          ".read": "auth != null && (root.child('usuarios').child(auth.uid).child('locales').child($local).val() === true || root.child('usuarios').child(auth.uid).child('superadmin').val() === true)",
           "total": {
             ".write": true,
-            ".validate": "newData.isNumber() && ((!data.exists() && newData.val() === 1) || newData.val() === data.val() + 1)"
+            ".validate": "newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + 1"
           },
           "dias": {
             "$dia": {
               ".write": true,
-              ".validate": "$dia.matches(/^20[0-9]{2}-[01][0-9]-[0-3][0-9]$/) && newData.isNumber() && ((!data.exists() && newData.val() === 1) || newData.val() === data.val() + 1)"
+              ".validate": "$dia.matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) && newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + 1"
             }
           }
-        },
-
-        "$otro": { ".validate": false }
+        }
       }
     }
   }
