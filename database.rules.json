@@ -41,7 +41,7 @@
             "valor": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000" },
             "oferta": { ".validate": "newData.isBoolean()" },
             "valorOferta": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000" },
-            "imagen": { ".validate": "newData.isString() && newData.val().length <= 2000 && (newData.val() === '' || newData.val().beginsWith('https://'))" },
+            "imagen": { ".validate": "newData.isString() && newData.val().length <= 2000 && (newData.val() === '' || newData.val().beginsWith('https:'))" },
             "medallones": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5" },
             "oculto": { ".validate": "newData.isBoolean()" },
             "$otro": { ".validate": false }
