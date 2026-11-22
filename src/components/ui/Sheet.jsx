@@ -31,7 +31,8 @@ export default function Sheet({ open, onClose, title, hideTitle = false, childre
       ref={ref}
       className={`${s.sheet} ${wide ? s.sheetWide : ""} ${editor ? s.sheetEditor : ""}`}
       aria-labelledby={titleId}
-      onClose={() => open && onClose?.()}
+      // El evento close llega después: si el diálogo ya se reabrió (Strict Mode, Activity), se ignora.
+      onClose={() => open && !ref.current?.open && onClose?.()}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose?.();
       }}

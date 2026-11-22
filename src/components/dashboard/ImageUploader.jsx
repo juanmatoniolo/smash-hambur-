@@ -2,7 +2,8 @@
 import { useRef, useState } from "react";
 import { ImagePlus, Link2, Pencil, Trash2 } from "lucide-react";
 import ProductImage from "@/components/menu/ProductImage";
-import { cloudinaryConfigured, directImageUrl, uploadImage, validateImageFile, verifyImage } from "@/lib/cloudinary-client";
+import { discardImage } from "@/lib/admin-data";
+import { IMAGE_ACCEPT, MAX_BYTES, canOpenInBrowser, cloudinaryConfigured, directImageUrl, uploadImage, validateImageFile, verifyImage } from "@/lib/cloudinary-client";
 import PhotoEditor from "./PhotoEditor";
 import s from "./dashboard.module.css";
 
@@ -15,15 +16,42 @@ export default function ImageUploader({ value, onChange, local, product }) {
   const [checking, setChecking] = useState(false);
   const [over, setOver] = useState(false);
   const canUpload = cloudinaryConfigured();
-  const uploading = progress !== null;
+  const [converting, setConverting] = useState(false);
+  const uploading = progress !== null || converting;
 
-  function pick(f) {
+  async function pick(f) {
     const err = validateImageFile(f);
     setError(err);
-    if (!err) setSource({ file: f });
+    if (err) return;
+    setConverting(true);
+    try {
+      if (await canOpenInBrowser(f)) {
+        setSource({ file: f });
+        return;
+      }
+      // Formatos que el navegador no abre (HEIC, TIFF, RAW...): los convierte Cloudinary.
+      if (f.size > MAX_BYTES) {
+        setError("Este formato se convierte en la nube y admite hasta 10 MB. Probá con una foto más liviana.");
+        return;
+      }
+      setProgress(0);
+      const url = await uploadImage(f, local, setProgress);
+      setSource({ src: url, temp: url });
+    } catch {
+      setError("No pudimos convertir esa imagen. Probá exportarla como JPG o PNG.");
+    } finally {
+      setConverting(false);
+      setProgress(null);
+    }
+  }
+
+  function closeEditor() {
+    if (source?.temp) discardImage(local, source.temp);
+    setSource(null);
   }
 
   async function upload(blob) {
+    const temp = source?.temp;
     setSource(null);
     setError("");
     setProgress(0);
@@ -34,6 +62,7 @@ export default function ImageUploader({ value, onChange, local, product }) {
       setError(e.message);
     } finally {
       setProgress(null);
+      if (temp) discardImage(local, temp);
     }
   }
 
@@ -78,7 +107,7 @@ export default function ImageUploader({ value, onChange, local, product }) {
           <button type="button" className={s.dropEmpty} onClick={() => input.current?.click()} disabled={uploading}>
             <ImagePlus size={32} aria-hidden />
             <strong>Elegí una foto</strong>
-            <span>o arrastrala acá. Después la recortás y le ponés fondo.</span>
+            <span>o arrastrala acá. Sirve cualquier formato, también HEIC del iPhone.</span>
           </button>
         ) : (
           <div className={s.dropEmpty}>
@@ -87,9 +116,9 @@ export default function ImageUploader({ value, onChange, local, product }) {
           </div>
         )}
         {uploading ? (
-          <div className={s.progress} role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Subiendo foto">
-            <span style={{ width: `${progress}%` }} />
-            <em>Subiendo {progress}%</em>
+          <div className={s.progress} role="progressbar" aria-valuenow={progress ?? 0} aria-valuemin={0} aria-valuemax={100} aria-label="Procesando foto">
+            <span style={{ width: `${progress ?? 0}%` }} />
+            <em>{converting ? "Preparando" : "Subiendo"}{progress !== null ? ` ${progress}%` : "..."}</em>
           </div>
         ) : null}
       </div>
@@ -98,7 +127,7 @@ export default function ImageUploader({ value, onChange, local, product }) {
         <input
           ref={input}
           type="file"
-          accept="image/*"
+          accept={IMAGE_ACCEPT}
           hidden
           onChange={(e) => {
             pick(e.target.files?.[0]);
@@ -144,7 +173,7 @@ export default function ImageUploader({ value, onChange, local, product }) {
         </p>
       ) : null}
 
-      {source ? <PhotoEditor source={source} product={product} onCancel={() => setSource(null)} onDone={upload} /> : null}
+      {source ? <PhotoEditor source={source} product={product} onCancel={closeEditor} onDone={upload} /> : null}
     </div>
   );
 }

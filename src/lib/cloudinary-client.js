@@ -3,17 +3,40 @@ import { CLOUDINARY_ROOT } from "./site";
 
 const CLOUD = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "";
 const PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "";
-export const MAX_BYTES = 10 * 1024 * 1024;
+export const MAX_BYTES = 10 * 1024 * 1024; // límite para subir un original a Cloudinary
+const MAX_INPUT_BYTES = 60 * 1024 * 1024; // límite para abrir una foto en el navegador
+const IMAGE_EXTENSIONS = ["jpg", "jpeg", "jfif", "png", "webp", "avif", "gif", "bmp", "svg", "tif", "tiff", "heic", "heif", "ico", "psd", "dng", "raw", "cr2", "cr3", "nef", "arw", "orf", "rw2"];
+// Algunos formatos llegan sin tipo MIME (HEIC en Windows, RAW), por eso también se aceptan por extensión.
+export const IMAGE_ACCEPT = `image/*,${IMAGE_EXTENSIONS.map((e) => `.${e}`).join(",")}`;
 
 export function cloudinaryConfigured() {
   return Boolean(CLOUD && PRESET);
 }
 
+function fileExtension(file) {
+  return String(file?.name || "").split(".").pop().toLowerCase();
+}
+
 export function validateImageFile(file) {
   if (!file) return "Elegí una imagen.";
-  if (!/^image\/(jpeg|png|webp|heic|heif|avif)$/i.test(file.type)) return "El archivo tiene que ser una foto (JPG, PNG o WebP).";
-  if (file.size > MAX_BYTES) return "La foto pesa más de 10 MB.";
+  if (!/^image\//i.test(file.type) && !IMAGE_EXTENSIONS.includes(fileExtension(file))) return "Ese archivo no es una imagen.";
+  if (file.size > MAX_INPUT_BYTES) return "La imagen pesa más de 60 MB.";
   return "";
+}
+
+/** true si este navegador puede abrir la imagen sin convertirla. */
+export function canOpenInBrowser(file) {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    const done = (ok) => {
+      URL.revokeObjectURL(url);
+      resolve(ok);
+    };
+    img.onload = () => done(img.naturalWidth > 0 && img.naturalHeight > 0);
+    img.onerror = () => done(false);
+    img.src = url;
+  });
 }
 
 /** Subida unsigned con progreso a <ROOT>/<local>. Devuelve la secure_url. */
@@ -30,7 +53,7 @@ export function uploadImage(blob, local, onProgress) {
     const form = new FormData();
     // Nombre único: el preset usa el nombre del archivo y un upload unsigned no puede pisar
     // uno existente (devuelve la foto vieja). Sin esto todas las fotos se llamaban "blob".
-    const ext = (blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
+    const ext = fileExtension(blob) || (blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
     const name = `foto-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     form.append("file", blob, name);
     form.append("upload_preset", PRESET);

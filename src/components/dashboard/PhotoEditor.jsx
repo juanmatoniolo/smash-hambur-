@@ -42,11 +42,12 @@ function loadImage({ file, src }) {
     const img = new Image();
     const objectUrl = file ? URL.createObjectURL(file) : null;
     if (!file) img.crossOrigin = "anonymous";
-    img.onload = () => resolve({ img, objectUrl });
-    img.onerror = () => {
+    const fail = () => {
       if (objectUrl) URL.revokeObjectURL(objectUrl);
       reject(new Error(file ? "No pudimos abrir esa foto. Probá con otra (JPG o PNG)." : "Esta foto no se puede editar desde acá. Subila de nuevo desde tu celular o compu."));
     };
+    img.onload = () => (img.naturalWidth > 0 && img.naturalHeight > 0 ? resolve({ img, objectUrl }) : fail());
+    img.onerror = fail;
     img.src = objectUrl || cldUrl(src, "f_jpg,q_auto,c_limit,w_2400");
   });
 }
@@ -303,8 +304,9 @@ export default function PhotoEditor({ source, product, onCancel, onDone }) {
           if (blob) onDone(blob);
           else setError("No se pudo preparar la foto. Probá de nuevo.");
         },
+        // JPG de alta calidad como original: Cloudinary entrega AVIF o WebP según cada navegador.
         "image/jpeg",
-        0.88
+        0.92
       );
     } catch {
       setBusy(false);

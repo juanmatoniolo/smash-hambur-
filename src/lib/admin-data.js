@@ -167,6 +167,11 @@ function afterSave(local, oldImage = "") {
   if (oldImage) authedPost("/api/cloudinary/cleanup", { local, url: oldImage }).catch(() => {});
 }
 
+/** Borra un original temporal. El servidor no lo toca si algún producto lo usa. */
+export function discardImage(local, url) {
+  authedPost("/api/cloudinary/cleanup", { local, url }).catch(() => {});
+}
+
 /* ---------------- Administración (superadmin) ---------------- */
 
 export async function listLocales() {
