@@ -9,7 +9,7 @@
   "-P6wNvyEeOE6xaE4XBW7": null,
   "cheeseburger": {
     "nombre": "Cheeseburger",
-    "descripcion": "Pan brioche, salsa Staker, carne 100% tapa de asado, cheddar.",
+    "descripcion": "Pan brioche, Carne 100% tapa de asado, Cheddar, Salsa Staker.",
     "categoria": "hamburguesas",
     "valor": 8500,
     "oferta": false,
@@ -21,11 +21,23 @@
       "triple": 15000,
       "cuadruple": 16800
     },
+    "ingredientes": {
+      "pan": [
+        "Pan brioche"
+      ],
+      "carne": [
+        "Carne 100% tapa de asado"
+      ],
+      "aderezos": [
+        "Cheddar",
+        "Salsa Staker"
+      ]
+    },
     "oculto": false
   },
   "bacon-extreme": {
     "nombre": "Bacon Extreme",
-    "descripcion": "Pan brioche, salsa Staker, BBQ, carne 100% tapa de asado, cheddar, panceta crocante.",
+    "descripcion": "Pan brioche, Carne 100% tapa de asado, BBQ, Cheddar, Panceta crocante, Salsa Staker.",
     "categoria": "hamburguesas",
     "valor": 11500,
     "oferta": false,
@@ -37,11 +49,25 @@
       "triple": 17000,
       "cuadruple": 19000
     },
+    "ingredientes": {
+      "pan": [
+        "Pan brioche"
+      ],
+      "carne": [
+        "Carne 100% tapa de asado"
+      ],
+      "aderezos": [
+        "BBQ",
+        "Cheddar",
+        "Panceta crocante",
+        "Salsa Staker"
+      ]
+    },
     "oculto": false
   },
   "american": {
     "nombre": "American",
-    "descripcion": "Pan brioche, salsa Staker, carne 100% tapa de asado, cheddar, lechuga repollada, tomate.",
+    "descripcion": "Pan brioche, Carne 100% tapa de asado, Cheddar, Lechuga repollada, Salsa Staker, Tomate.",
     "categoria": "hamburguesas",
     "valor": 10500,
     "oferta": false,
@@ -52,12 +78,26 @@
       "doble": 13500,
       "triple": 15000,
       "cuadruple": 17000
+    },
+    "ingredientes": {
+      "pan": [
+        "Pan brioche"
+      ],
+      "carne": [
+        "Carne 100% tapa de asado"
+      ],
+      "aderezos": [
+        "Cheddar",
+        "Lechuga repollada",
+        "Salsa Staker",
+        "Tomate"
+      ]
     },
     "oculto": false
   },
   "onion-oklahoma": {
     "nombre": "Onion Oklahoma",
-    "descripcion": "Pan brioche, mostaza, carne 100% tapa de asado, cheddar, cebolla, pepinillos.",
+    "descripcion": "Pan brioche, Carne 100% tapa de asado, Cebolla, Cheddar, Mostaza, Pepinillos.",
     "categoria": "hamburguesas",
     "valor": 10500,
     "oferta": false,
@@ -69,11 +109,25 @@
       "triple": 15000,
       "cuadruple": 17000
     },
+    "ingredientes": {
+      "pan": [
+        "Pan brioche"
+      ],
+      "carne": [
+        "Carne 100% tapa de asado"
+      ],
+      "aderezos": [
+        "Cebolla",
+        "Cheddar",
+        "Mostaza",
+        "Pepinillos"
+      ]
+    },
     "oculto": false
   },
   "crispy": {
     "nombre": "Crispy con queso cheddar",
-    "descripcion": "Pan brioche, salsa Staker, BBQ, bacon, cebolla crispy, cheddar, carne 100% tapa de asado.",
+    "descripcion": "Pan brioche, Carne 100% tapa de asado, Bacon, BBQ, Cebolla crispy, Cheddar, Salsa Staker.",
     "categoria": "hamburguesas",
     "valor": 12000,
     "oferta": false,
@@ -85,11 +139,26 @@
       "triple": 18000,
       "cuadruple": 20000
     },
+    "ingredientes": {
+      "pan": [
+        "Pan brioche"
+      ],
+      "carne": [
+        "Carne 100% tapa de asado"
+      ],
+      "aderezos": [
+        "Bacon",
+        "BBQ",
+        "Cebolla crispy",
+        "Cheddar",
+        "Salsa Staker"
+      ]
+    },
     "oculto": false
   },
   "la-argenta": {
     "nombre": "La Argenta",
-    "descripcion": "Pan brioche, mayonesa de chimichurri, cebolla morada, lechuga, carne 100% tapa de asado, el mix de 1000 granos.",
+    "descripcion": "Pan brioche, Carne 100% tapa de asado, Cebolla morada, El mix de 1000 granos, Lechuga, Mayonesa de chimichurri.",
     "categoria": "hamburguesas",
     "valor": 9500,
     "oferta": false,
@@ -101,11 +170,25 @@
       "triple": 16000,
       "cuadruple": 17500
     },
+    "ingredientes": {
+      "pan": [
+        "Pan brioche"
+      ],
+      "carne": [
+        "Carne 100% tapa de asado"
+      ],
+      "aderezos": [
+        "Cebolla morada",
+        "El mix de 1000 granos",
+        "Lechuga",
+        "Mayonesa de chimichurri"
+      ]
+    },
     "oculto": false
   },
   "la-toro": {
     "nombre": "La Toro",
-    "descripcion": "Pan brioche especial, salsa especial, carne 100% tapa de asado, cheddar, panceta, huevo, pepinillos.",
+    "descripcion": "Pan brioche especial, Carne 100% tapa de asado, Cheddar, Huevo, Panceta, Pepinillos, Salsa especial.",
     "categoria": "hamburguesas",
     "valor": 12000,
     "oferta": false,
@@ -116,6 +199,21 @@
       "doble": 14000,
       "triple": 17000,
       "cuadruple": 19000
+    },
+    "ingredientes": {
+      "pan": [
+        "Pan brioche especial"
+      ],
+      "carne": [
+        "Carne 100% tapa de asado"
+      ],
+      "aderezos": [
+        "Cheddar",
+        "Huevo",
+        "Panceta",
+        "Pepinillos",
+        "Salsa especial"
+      ]
     },
     "oculto": false
   }

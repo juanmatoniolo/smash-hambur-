@@ -1,13 +1,14 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import Loading from "@/components/Loading";
-import { deleteComida, getComida, saveComida } from "@/lib/admin-data";
+import { deleteComida, getComida, getComidas, saveComida } from "@/lib/admin-data";
 import { authError } from "@/lib/session";
-import { CATEGORIES, MAX_BASE_MEATS, MAX_MEATS, MEAT_PRICE_KEYS, MIN_MEATS, meatLabel } from "@/lib/site";
+import { CATEGORIES, MAX_BASE_MEATS, MAX_MEATS, MEAT_PRICE_KEYS, MIN_MEATS, cleanIngredients, hasIngredients, ingredientsText, meatLabel } from "@/lib/site";
 import { useDashboard } from "./DashboardShell";
 import ImageUploader from "./ImageUploader";
+import IngredientPicker from "./IngredientPicker";
 import PublishPreview from "./PublishPreview";
 import s from "./dashboard.module.css";
 
@@ -21,10 +22,40 @@ const EMPTY = {
   imagen: "",
   medallones: 1,
   precios: { doble: "", triple: "", cuadruple: "" },
+  ingredientes: { pan: [], carne: [], aderezos: [] },
   oculto: false,
 };
 
+/**
+ * Next conserva el estado de la página al navegar (Activity). Tras guardar o borrar se cambia la
+ * key al ocultarse, así el formulario y sus hijos vuelven limpios. Un borrador sin guardar se conserva.
+ */
 export default function ComidaForm({ id = null }) {
+  const [version, setVersion] = useState(0);
+  const finished = useRef(false);
+  const visible = useRef(false);
+
+  useLayoutEffect(() => {
+    visible.current = true;
+    return () => {
+      visible.current = false;
+      if (finished.current) {
+        finished.current = false;
+        setVersion((v) => v + 1);
+      }
+    };
+  }, []);
+
+  function onFinished() {
+    // Si el guardado termina con la pantalla ya oculta, no va a haber otra limpieza.
+    if (visible.current) finished.current = true;
+    else setVersion((v) => v + 1);
+  }
+
+  return <ComidaEditor key={version} id={id} onFinished={onFinished} />;
+}
+
+function ComidaEditor({ id, onFinished }) {
   const { local } = useDashboard();
   const router = useRouter();
   const [form, setForm] = useState(id ? null : EMPTY);
@@ -32,6 +63,19 @@ export default function ComidaForm({ id = null }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [notFound, setNotFound] = useState(false);
+  const [descMode, setDescMode] = useState("ingredientes");
+  const [knownIngredients, setKnownIngredients] = useState([]);
+
+  // Los ingredientes cargados en otros productos también aparecen como píldoras.
+  useEffect(() => {
+    let alive = true;
+    getComidas(local)
+      .then((all) => alive && setKnownIngredients(Object.values(all).map((p) => p?.ingredientes).filter(Boolean)))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [local]);
 
   useEffect(() => {
     if (!id) return;
@@ -43,7 +87,8 @@ export default function ComidaForm({ id = null }) {
           setNotFound(true);
           return;
         }
-        setForm({ ...EMPTY, ...c, medallones: Number(c.medallones) || (c.categoria === "hamburguesas" ? 1 : 0), valor: String(c.valor ?? ""), valorOferta: c.valorOferta ? String(c.valorOferta) : "", precios: { doble: String(c.precios?.doble ?? ""), triple: String(c.precios?.triple ?? ""), cuadruple: String(c.precios?.cuadruple ?? "") } });
+        setForm({ ...EMPTY, ...c, medallones: Number(c.medallones) || (c.categoria === "hamburguesas" ? 1 : 0), valor: String(c.valor ?? ""), valorOferta: c.valorOferta ? String(c.valorOferta) : "", precios: { doble: String(c.precios?.doble ?? ""), triple: String(c.precios?.triple ?? ""), cuadruple: String(c.precios?.cuadruple ?? "") }, descripcion: c.descripcion || "", ingredientes: cleanIngredients(c.ingredientes) });
+        setDescMode(hasIngredients(c.ingredientes) || !c.descripcion ? "ingredientes" : "manual");
         setOriginal(c.imagen || "");
       })
       .catch((e) => alive && setError(authError(e)));
@@ -70,15 +115,31 @@ export default function ComidaForm({ id = null }) {
 
   const offerInvalid = form.oferta && !(Number(form.valorOferta) > 0 && Number(form.valorOferta) < Number(form.valor));
 
+  // Sin píldoras elegidas se conserva el texto que ya tenía, para no borrar una descripción al cambiar de modo.
+  const usesIngredients = descMode === "ingredientes" && hasIngredients(form.ingredientes);
+  const finalDescripcion = usesIngredients ? ingredientsText(form.ingredientes) : form.descripcion;
+
+  function changeDescMode(mode) {
+    if (mode === "manual") setForm((f) => ({ ...f, descripcion: finalDescripcion }));
+    setDescMode(mode);
+  }
+
   async function submit(e) {
     e.preventDefault();
     if (!form.nombre.trim()) return setError("Poné un nombre.");
     if (!(Number(form.valor) > 0)) return setError("Poné un precio mayor a 0.");
     if (offerInvalid) return setError("El precio de oferta tiene que ser menor al precio normal.");
+    if (finalDescripcion.length > 400) return setError("Los ingredientes superan los 400 caracteres. Quitá alguno.");
     setSaving(true);
     setError("");
     try {
-      await saveComida(local, id, { ...form, medallones: meatsValue }, original);
+      await saveComida(
+        local,
+        id,
+        { ...form, medallones: meatsValue, descripcion: finalDescripcion, ingredientes: usesIngredients ? form.ingredientes : null },
+        original
+      );
+      onFinished();
       router.push(`/dashboard/${local}`);
     } catch (err) {
       setError(authError(err));
@@ -91,6 +152,7 @@ export default function ComidaForm({ id = null }) {
     setSaving(true);
     try {
       await deleteComida(local, id, form.imagen);
+      onFinished();
       router.push(`/dashboard/${local}`);
     } catch (err) {
       setError(authError(err));
@@ -103,18 +165,11 @@ export default function ComidaForm({ id = null }) {
       <div className={s.formMain}>
         <h1 className={s.h1}>{id ? "Editar producto" : "Nuevo producto"}</h1>
 
-        <label className="field">
-          <span>Nombre</span>
-          <input className="input" value={form.nombre} onChange={onInput("nombre")} maxLength={80} required />
-        </label>
-
-        <label className="field">
-          <span>Descripción</span>
-          <textarea className="input" value={form.descripcion} onChange={onInput("descripcion")} maxLength={400} rows={3} placeholder="Ingredientes, tamaño..." />
-          <span className="hint">{form.descripcion.length}/400</span>
-        </label>
-
         <div className={s.row2}>
+          <label className="field">
+            <span>Nombre</span>
+            <input className="input" value={form.nombre} onChange={onInput("nombre")} maxLength={80} required />
+          </label>
           <label className="field">
             <span>Categoría</span>
             <select
@@ -132,80 +187,111 @@ export default function ComidaForm({ id = null }) {
               ))}
             </select>
           </label>
-          <label className="field">
-            <span>Precio ($)</span>
-            <input className="input" inputMode="numeric" value={form.valor} onChange={numeric("valor")} placeholder="0" required />
-          </label>
         </div>
 
-        {form.categoria !== "bebidas" ? (
-          <label className="field">
-            <span>Carnes incluidas en el precio</span>
-            <select className="input" value={meatsValue} onChange={(e) => set("medallones")(Number(e.target.value))}>
-              {form.categoria !== "hamburguesas" ? <option value={0}>No lleva carne para elegir</option> : null}
-              {Array.from({ length: MAX_BASE_MEATS - MIN_MEATS + 1 }, (_, i) => i + MIN_MEATS).map((n) => (
-                <option key={n} value={n}>
-                  {n} ({meatLabel(n)})
-                </option>
-              ))}
-            </select>
-            <span className="hint">
-              {meatsValue > 0
-                ? `El cliente elige de ${meatsValue} a ${MAX_MEATS} carnes. El precio de arriba es el de ${meatLabel(meatsValue).toLowerCase()}.`
-                : "El cliente no elige cantidad de carnes en este producto."}
-            </span>
-          </label>
-        ) : null}
+        <section className={s.formSection} aria-labelledby="sec-foto">
+          <h2 id="sec-foto" className={s.h2}>
+            Foto
+          </h2>
+          <ImageUploader value={form.imagen} onChange={set("imagen")} local={local} product={{ ...form, descripcion: finalDescripcion }} />
+        </section>
 
-        {form.categoria !== "bebidas" && meatsValue > 0 ? (
-          <div className="field">
-            <div className={s.row2}>
-              {Object.entries(MEAT_PRICE_KEYS)
-                .filter(([n]) => Number(n) > meatsValue)
-                .map(([n, k]) => (
-                  <label key={k} className="field">
-                    <span>Precio {meatLabel(Number(n)).toLowerCase()} ($)</span>
-                    <input className="input" inputMode="numeric" value={form.precios[k]} onChange={setMeatPrice(k)} placeholder="Automático" />
-                  </label>
-                ))}
-            </div>
-            <span className="hint">Total final de cada opción. Vacío = se calcula con +$3.000, +$5.000 y +$7.000 sobre 1 carne.</span>
+        <section className={s.formSection} aria-labelledby="sec-ingredientes">
+          <h2 id="sec-ingredientes" className={s.h2}>
+            Descripción
+          </h2>
+          <div className={s.segmented} role="radiogroup" aria-labelledby="sec-ingredientes">
+            <label className={s.segment}>
+              <input type="radio" name="descMode" checked={descMode === "ingredientes"} onChange={() => changeDescMode("ingredientes")} />
+              <span>Elegir ingredientes</span>
+            </label>
+            <label className={s.segment}>
+              <input type="radio" name="descMode" checked={descMode === "manual"} onChange={() => changeDescMode("manual")} />
+              <span>Escribir a mano</span>
+            </label>
           </div>
-        ) : null}
 
-        <div className={s.toggleBox}>
-          <label className={s.check}>
-            <input type="checkbox" checked={form.oferta} onChange={onInput("oferta")} />
-            <span>En oferta</span>
-          </label>
-          {form.oferta ? (
+          {descMode === "ingredientes" ? (
+            <IngredientPicker value={form.ingredientes} known={knownIngredients} onChange={set("ingredientes")} />
+          ) : (
             <label className="field">
-              <span>Precio de oferta ($)</span>
-              <input
-                className="input"
-                inputMode="numeric"
-                value={form.valorOferta}
-                onChange={numeric("valorOferta")}
-                aria-invalid={offerInvalid ? "true" : undefined}
-              />
-              {offerInvalid ? <span className="error-text">Tiene que ser menor al precio normal.</span> : null}
+              <span className="visually-hidden">Descripción</span>
+              <textarea className="input" value={form.descripcion} onChange={onInput("descripcion")} maxLength={400} rows={3} placeholder="Ingredientes, tamaño..." />
+              <span className="hint">{form.descripcion.length}/400</span>
+            </label>
+          )}
+        </section>
+
+        <section className={s.formSection} aria-labelledby="sec-precios">
+          <h2 id="sec-precios" className={s.h2}>
+            Precios
+          </h2>
+
+          {form.categoria !== "bebidas" ? (
+            <label className="field">
+              <span>Carnes incluidas en el precio base</span>
+              <select className="input" value={meatsValue} onChange={(e) => set("medallones")(Number(e.target.value))}>
+                {form.categoria !== "hamburguesas" ? <option value={0}>No lleva carne para elegir</option> : null}
+                {Array.from({ length: MAX_BASE_MEATS - MIN_MEATS + 1 }, (_, i) => i + MIN_MEATS).map((n) => (
+                  <option key={n} value={n}>
+                    {n} ({meatLabel(n)})
+                  </option>
+                ))}
+              </select>
             </label>
           ) : null}
-        </div>
 
-        <label className={s.check}>
-          <input type="checkbox" checked={form.oculto} onChange={onInput("oculto")} />
-          <span>Ocultar de la carta (sin stock)</span>
-        </label>
+          <div className={s.row2}>
+            <label className="field">
+              <span>{meatsValue > 0 ? `Precio ${meatLabel(meatsValue).toLowerCase()} ($)` : "Precio ($)"}</span>
+              <input className="input" inputMode="numeric" value={form.valor} onChange={numeric("valor")} placeholder="0" required />
+            </label>
+            {form.categoria !== "bebidas" && meatsValue > 0
+              ? Object.entries(MEAT_PRICE_KEYS)
+                  .filter(([n]) => Number(n) > meatsValue)
+                  .map(([n, k]) => (
+                    <label key={k} className="field">
+                      <span>Precio {meatLabel(Number(n)).toLowerCase()} ($)</span>
+                      <input className="input" inputMode="numeric" value={form.precios[k]} onChange={setMeatPrice(k)} placeholder="Automático" />
+                    </label>
+                  ))
+              : null}
+          </div>
+          {form.categoria !== "bebidas" && meatsValue > 0 ? (
+            <p className="hint">
+              El cliente elige de {meatsValue} a {MAX_MEATS} carnes. Cada precio es el total. Vacío = +$3.000, +$5.000 y +$7.000 sobre 1 carne.
+            </p>
+          ) : null}
 
-        <div className="field">
-          <span className="label">Foto</span>
-          <ImageUploader value={form.imagen} onChange={set("imagen")} local={local} />
-        </div>
+          <div className={s.toggleBox}>
+            <label className={s.check}>
+              <input type="checkbox" checked={form.oferta} onChange={onInput("oferta")} />
+              <span>En oferta</span>
+            </label>
+            {form.oferta ? (
+              <label className="field">
+                <span>Precio de oferta ($)</span>
+                <input
+                  className="input"
+                  inputMode="numeric"
+                  value={form.valorOferta}
+                  onChange={numeric("valorOferta")}
+                  aria-invalid={offerInvalid ? "true" : undefined}
+                />
+                {offerInvalid ? <span className="error-text">Tiene que ser menor al precio normal.</span> : null}
+              </label>
+            ) : null}
+          </div>
+
+          <label className={s.check}>
+            <input type="checkbox" checked={form.oculto} onChange={onInput("oculto")} />
+            <span>Ocultar de la carta (sin stock)</span>
+          </label>
+        </section>
       </div>
 
       <aside className={s.formSide}>
-        <PublishPreview data={form} />
+        <PublishPreview data={{ ...form, descripcion: finalDescripcion }} />
       </aside>
 
       <div className={s.saveBar}>

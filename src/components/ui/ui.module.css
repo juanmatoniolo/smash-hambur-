@@ -83,6 +83,9 @@
   .sheetWide {
     width: min(680px, calc(100% - 48px));
   }
+  .sheetEditor {
+    width: min(1040px, calc(100% - 48px));
+  }
   .sheet[open] {
     animation: sheetFade 0.18s ease-out;
   }

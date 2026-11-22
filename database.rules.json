@@ -49,6 +49,12 @@
               "cuadruple": { ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= 100000000" },
               "$otro": { ".validate": false }
             },
+            "ingredientes": {
+              "$grupo": {
+                ".validate": "$grupo.matches(/^(pan|carne|aderezos)$/)",
+                "$i": { ".validate": "$i.matches(/^[0-9]{1,2}$/) && newData.isString() && newData.val().length > 0 && newData.val().length <= 40" }
+              }
+            },
             "oculto": { ".validate": "newData.isBoolean()" },
             "$otro": { ".validate": false }
           }
@@ -62,6 +68,7 @@
           "direccion": { ".validate": "newData.isString() && newData.val().length <= 200" },
           "alias": { ".validate": "newData.isString() && newData.val().length <= 80" },
           "costoEnvio": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000" },
+          "costoEnvioFuera": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000" },
           "extras": {
             "medallon": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000" },
             "carne": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000000" },

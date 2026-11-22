@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
-import { Banknote, Bike, Check, Copy, CreditCard, Landmark, Store } from "lucide-react";
-import { envioLabel } from "@/lib/site";
+import { Banknote, Bike, Check, Copy, CreditCard, Landmark, MapPin, Route, Store } from "lucide-react";
+import { SHIPPING_ZONES, envioLabel, shippingCost } from "@/lib/site";
 import s from "./checkout.module.css";
 
 function Choice({ name, value, checked, onChange, icon: Icon, title, note }) {
@@ -62,7 +62,7 @@ export default function BuyerForm({ buyer, setBuyer, datos, errors }) {
             onChange={set("entrega")}
             icon={Bike}
             title="Envío a domicilio"
-            note={`Envío: ${envioLabel(datos.costoEnvio)}`}
+            note="El costo depende de la zona"
           />
           <Choice
             name="entrega"
@@ -78,6 +78,23 @@ export default function BuyerForm({ buyer, setBuyer, datos, errors }) {
 
       {buyer.entrega === "envio" ? (
         <>
+          <fieldset className={s.fieldset}>
+            <legend className="label">¿A qué zona?</legend>
+            <div className={s.choices}>
+              {SHIPPING_ZONES.map((z) => (
+                <Choice
+                  key={z.id}
+                  name="zona"
+                  value={z.id}
+                  checked={buyer.zona === z.id}
+                  onChange={set("zona")}
+                  icon={z.id === "ciudad" ? MapPin : Route}
+                  title={z.label}
+                  note={`Envío: ${envioLabel(shippingCost(datos, z.id))}`}
+                />
+              ))}
+            </div>
+          </fieldset>
           <label className="field">
             <span>Dirección</span>
             <input

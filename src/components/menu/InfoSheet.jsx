@@ -2,7 +2,7 @@
 import { Clock, CreditCard, MapPin } from "lucide-react";
 import Sheet from "@/components/ui/Sheet";
 import { FacebookIcon, InstagramIcon, WhatsAppIcon } from "@/components/BrandIcons";
-import { PAYMENT_METHODS, envioLabel, facebookUrl, fullAddress, instagramUrl, mapsUrl, waNumber } from "@/lib/site";
+import { PAYMENT_METHODS, SHIPPING_ZONES, envioLabel, facebookUrl, fullAddress, instagramUrl, mapsUrl, shippingCost, waNumber } from "@/lib/site";
 import { DAY_KEYS, DAY_LABELS, WEEK_ORDER, franjasText, hasAnyHorario, nowInZone } from "@/utils/horarios";
 import { StatusPill, useOpenStatus } from "./Hero";
 import s from "./menu.module.css";
@@ -58,9 +58,15 @@ export default function InfoSheet({ open, onClose, datos, horarios }) {
         <h3 id="info-envio" className={s.infoTitle}>
           Envío
         </h3>
-        <p>
-          Costo de envío: <strong>{envioLabel(datos.costoEnvio)}</strong>. También podés retirar en el local.
-        </p>
+        <ul className={s.hours}>
+          {SHIPPING_ZONES.map((z) => (
+            <li key={z.id}>
+              <span>{z.label}</span>
+              <strong>{envioLabel(shippingCost(datos, z.id))}</strong>
+            </li>
+          ))}
+        </ul>
+        <p>También podés retirar en el local.</p>
       </section>
 
       <section className={s.infoBlock} aria-labelledby="info-pago">

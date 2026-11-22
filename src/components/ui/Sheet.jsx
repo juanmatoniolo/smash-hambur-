@@ -7,7 +7,7 @@ import s from "./ui.module.css";
  * Bottom sheet en móvil y diálogo centrado desde 768 px, sobre <dialog> nativo
  * (foco atrapado, Escape y top layer gratis).
  */
-export default function Sheet({ open, onClose, title, hideTitle = false, children, footer, wide = false }) {
+export default function Sheet({ open, onClose, title, hideTitle = false, children, footer, wide = false, editor = false }) {
   const ref = useRef(null);
   const titleId = useId();
 
@@ -29,7 +29,7 @@ export default function Sheet({ open, onClose, title, hideTitle = false, childre
   return (
     <dialog
       ref={ref}
-      className={`${s.sheet} ${wide ? s.sheetWide : ""}`}
+      className={`${s.sheet} ${wide ? s.sheetWide : ""} ${editor ? s.sheetEditor : ""}`}
       aria-labelledby={titleId}
       onClose={() => open && onClose?.()}
       onClick={(e) => {

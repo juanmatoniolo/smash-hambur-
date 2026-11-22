@@ -515,9 +515,71 @@ fieldset.card {
   gap: 12px;
 }
 
+.formSection {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.formSection .h2 {
+  margin: 0;
+}
+
 .toggleBox {
   display: grid;
   gap: 8px;
+}
+
+.ingredients,
+.ingredientGroup {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ingredients {
+  gap: 18px;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: var(--tap);
+  max-width: 100%;
+  padding: 6px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.pill:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+.pillOn,
+.pillOn:hover {
+  border-color: var(--accent-fill);
+  background: var(--accent-fill);
+  color: var(--on-accent);
+}
+
+.pillAdd {
+  border-style: dashed;
+  background: transparent;
 }
 
 .saveBar {
@@ -595,12 +657,27 @@ fieldset.card {
 
 .dropEmpty {
   display: grid;
-  place-items: center;
-  gap: 8px;
-  aspect-ratio: 4 / 3;
+  place-content: center;
+  justify-items: center;
+  gap: 6px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 220px;
   color: var(--text-muted);
+  font-size: 14px;
   text-align: center;
   padding: 16px;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+button.dropEmpty:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.dropEmpty strong {
+  color: var(--text);
+  font-size: 16px;
 }
 
 .progress {
@@ -639,58 +716,368 @@ fieldset.card {
   align-items: flex-end;
 }
 
+.linkRow .btn {
+  flex-shrink: 0;
+}
+
+.linkRow .btn svg {
+  flex-shrink: 0;
+}
+
+.linkBox {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.linkBox summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--tap);
+  width: fit-content;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.linkBox summary:hover {
+  color: var(--text);
+}
+
 /* ---------- Photo editor ---------- */
-.stage {
+.editor {
+  display: grid;
+  gap: 14px;
+}
+
+.editorStage {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: grid;
+  gap: 6px;
+  margin: 0 -20px;
+  padding: 0 20px 10px;
+  background: var(--surface);
+}
+
+.frame {
   position: relative;
-  width: 100%;
   aspect-ratio: 4 / 3;
   overflow: hidden;
   border-radius: 12px;
-  background: #000;
+  background: var(--surface-3);
+}
+
+.frameCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
   touch-action: none;
   cursor: grab;
   user-select: none;
 }
 
-.stage:active {
+.frameCanvas:active {
   cursor: grabbing;
 }
 
-.stageImg {
+.frameCanvas:focus-visible {
+  outline-offset: -3px;
+  border-radius: 12px;
+}
+
+/* El centro cuadrado es lo que muestra la lista de la carta. */
+.frameGuide {
   position: absolute;
-  max-width: none;
+  top: 0;
+  bottom: 0;
+  left: 12.5%;
+  right: 12.5%;
+  border-inline: 1px dashed rgba(253, 246, 240, 0.75);
+  outline: 1px dashed rgba(0, 0, 0, 0.45);
+  outline-offset: -1px;
   pointer-events: none;
 }
 
-.stageGuide {
+.frameLoading {
   position: absolute;
   inset: 0;
-  pointer-events: none;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.22) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.22) 1px, transparent 1px);
-  background-size: 33.333% 33.333%;
-  background-position: -1px -1px;
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.4);
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  font-weight: 600;
 }
 
-.zoom {
+.frameHint {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.frameHint svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.editorPanel {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-width: 0;
+}
+
+.segmented {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--surface-3);
+}
+
+.segment {
+  position: relative;
+  cursor: pointer;
+}
+
+.segment input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.segment span {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: var(--tap);
-  margin-top: 8px;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 6px;
+  border-radius: 10px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 700;
+  transition: background-color 0.15s, color 0.15s;
 }
 
-.zoom input {
-  flex: 1;
+.segment:hover span {
+  color: var(--text);
+}
+
+.segment input:checked + span {
+  background: var(--cream);
+  color: var(--black);
+}
+
+.segment input:focus-visible + span {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.toolPanel {
+  display: grid;
+  gap: 12px;
+  border: 0;
+  min-width: 0;
+}
+
+.zoomRow {
+  display: grid;
+  grid-template-columns: var(--tap) minmax(0, 1fr) var(--tap);
+  align-items: center;
+  gap: 4px;
+}
+
+.editor input[type="range"] {
+  width: 100%;
+  min-height: 32px;
   accent-color: var(--accent-fill);
+}
+
+.toolGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   min-height: var(--tap);
+  padding: 6px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.tool:hover {
+  border-color: var(--text-muted);
+}
+
+.tool[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.toolWide {
+  grid-column: 1 / -1;
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.swatchOption {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  padding: 3px 0;
+  cursor: pointer;
+}
+
+.swatchOption input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.swatch {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--cream);
+}
+
+.swatchBlur {
+  background: radial-gradient(circle at 30% 30%, #d9872c, #7a2610 62%, #2a0d07);
+}
+
+.swatchOption input:checked + .swatch {
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent);
+}
+
+.swatchOption input:focus-visible + .swatch {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.swatchLabel {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.15;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.swatchOption input:checked ~ .swatchLabel {
+  color: var(--text);
+}
+
+.colorRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: var(--tap);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.colorRow input {
+  width: 64px;
+  height: 38px;
+  padding: 2px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface-2);
+  cursor: pointer;
+}
+
+.adjust {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 8px;
+}
+
+.adjust input {
+  grid-column: 1 / -1;
+}
+
+.adjustLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.adjustValue {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.editorPreview {
+  display: grid;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.previewThumb {
+  display: block;
+  background: var(--surface-2);
 }
 
 .editorActions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.resetBtn {
+  margin-right: auto;
+  padding: 0 12px;
+}
+
+@media (max-width: 479px) {
+  .resetBtn span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+}
+
+@media (min-width: 768px) {
+  .editor {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 24px;
+    align-items: start;
+  }
+  .editorStage {
+    margin: 0;
+    padding: 0;
+  }
 }
 
 /* ---------- Horarios ---------- */

@@ -1,0 +1,103 @@
+{
+  "-P6wNw0h2iwNHygW42Ug": {
+    "categoria": "papas",
+    "descripcion": "Papas fritas caseras con sal.",
+    "imagen": "https://images.unsplash.com/photo-1585109649139-366815a0d713?w=1200&h=900&fit=crop&q=80&fm=jpg",
+    "nombre": "Papas clásicas",
+    "oculto": false,
+    "oferta": false,
+    "valor": 5000,
+    "valorOferta": 0
+  },
+  "-P6wNw4OiB4HfcAMn5te": {
+    "categoria": "papas",
+    "descripcion": "Papas fritas con salsa cheddar y panceta crocante.",
+    "imagen": "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=1200&h=900&fit=crop&q=80&fm=jpg",
+    "nombre": "Papas con cheddar y panceta",
+    "oculto": false,
+    "oferta": false,
+    "valor": 8500,
+    "valorOferta": 0
+  },
+  "-P6wNw7tV5hB8fjhnp64": {
+    "categoria": "papas",
+    "descripcion": "Papas con cáscara, ajo y perejil.",
+    "imagen": "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=1200&h=900&fit=crop&q=80&fm=jpg",
+    "nombre": "Papas rústicas",
+    "oculto": false,
+    "oferta": false,
+    "valor": 6500,
+    "valorOferta": 0
+  },
+  "-P6wNwBd9YHMi3QNpKBD": {
+    "categoria": "papas",
+    "descripcion": "Porción grande para compartir, con dos dips.",
+    "imagen": "https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?w=1200&h=900&fit=crop&q=80&fm=jpg",
+    "nombre": "Papas en canasta",
+    "oculto": false,
+    "oferta": false,
+    "valor": 7500,
+    "valorOferta": 0
+  },
+  "-P6wNwFCN8BWwInrhLWm": {
+    "categoria": "bebidas",
+    "descripcion": "Lata 354 ml.",
+    "imagen": "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=1200&h=900&fit=crop&q=80&fm=jpg",
+    "nombre": "Coca-Cola lata",
+    "oculto": false,
+    "oferta": false,
+    "valor": 2500,
+    "valorOferta": 0
+  },
+  "-P6wNwIp59dT7oTOfpp5": {
+    "categoria": "bebidas",
+    "descripcion": "Limonada casera con menta y jengibre, 500 ml.",
+    "imagen": "https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=1200&h=900&fit=crop&q=80&fm=jpg",
+    "nombre": "Limonada",
+    "oculto": false,
+    "oferta": false,
+    "valor": 3500,
+    "valorOferta": 0
+  },
+  "-P6wNwMB5bqulm7cKoYv": {
+    "categoria": "bebidas",
+    "descripcion": "Exprimido en el momento, 500 ml.",
+    "imagen": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=1200&h=900&fit=crop&q=80&fm=jpg",
+    "nombre": "Jugo de naranja",
+    "oculto": false,
+    "oferta": false,
+    "valor": 3500,
+    "valorOferta": 0
+  },
+  "-P6wNwPtkCjZa7k9bxDf": {
+    "categoria": "bebidas",
+    "descripcion": "Pinta de rubia, 500 ml.",
+    "imagen": "https://images.unsplash.com/photo-1608270586620-248524c67de9?w=1200&h=900&fit=crop&q=80&fm=jpg",
+    "nombre": "Cerveza tirada",
+    "oculto": false,
+    "oferta": false,
+    "valor": 4500,
+    "valorOferta": 0
+  },
+  "-P6wNwTJWqQTsPuanER4": {
+    "categoria": "otros",
+    "descripcion": "8 tiras de pollo rebozado con salsa a elección.",
+    "imagen": "https://images.unsplash.com/photo-1562967914-608f82629710?w=1200&h=900&fit=crop&q=80&fm=jpg",
+    "nombre": "Tiras de pollo",
+    "oculto": false,
+    "oferta": false,
+    "valor": 8000,
+    "valorOferta": 0
+  },
+  "-P6wNwWtMwIrXWFtObdg": {
+    "categoria": "otros",
+    "descripcion": "Dos Toro Clásicas, papas y dos latas.",
+    "imagen": "https://images.unsplash.com/photo-1550547660-d9450f859349?w=1200&h=900&fit=crop&q=80&fm=jpg",
+    "medallones": 1,
+    "nombre": "Combo Dúo",
+    "oculto": false,
+    "oferta": false,
+    "valor": 22000,
+    "valorOferta": 0
+  }
+}

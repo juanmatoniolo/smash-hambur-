@@ -1,4 +1,4 @@
-import { SITE_NAME, envioLabel, formatPrice, fullAddress, includesFries, isCustomizable, meatLabel, paymentLabel } from "@/lib/site";
+import { SITE_NAME, envioLabel, formatPrice, fullAddress, includesFries, isCustomizable, meatLabel, paymentLabel, shippingCost, shippingZone } from "@/lib/site";
 
 /**
  * Mensaje de WhatsApp en texto plano con negritas (*...*).
@@ -6,8 +6,8 @@ import { SITE_NAME, envioLabel, formatPrice, fullAddress, includesFries, isCusto
  */
 export function buildOrderMessage({ datos, lines, subtotal, buyer }) {
   const envio = buyer.entrega === "envio";
-  const costo = envio ? datos.costoEnvio : 0;
-  const envioPending = envio && (costo === null || costo === undefined);
+  const costo = envio ? shippingCost(datos, buyer.zona) : 0;
+  const envioPending = envio && costo === null;
   const total = subtotal + (envio && !envioPending ? Number(costo) || 0 : 0);
 
   const out = [];
@@ -16,7 +16,10 @@ export function buildOrderMessage({ datos, lines, subtotal, buyer }) {
   out.push(`*Cliente:* ${buyer.nombre.trim()}`);
   out.push(`*Entrega:* ${envio ? "Envío a domicilio" : "Retiro en el local"}`);
   if (envio) {
-    out.push(`*Dirección:* ${fullAddress(buyer.direccion.trim())}`);
+    const fuera = shippingZone(buyer.zona).id === "fuera";
+    out.push(`*Zona:* ${shippingZone(buyer.zona).label}`);
+    // Fuera de la ciudad no se le agrega "Chajarí" a la dirección.
+    out.push(`*Dirección:* ${fuera ? buyer.direccion.trim() : fullAddress(buyer.direccion.trim())}`);
     if (buyer.referencia.trim()) out.push(`*Referencia:* ${buyer.referencia.trim()}`);
   }
   out.push(`*Pago:* ${paymentLabel(buyer.pago)}`);

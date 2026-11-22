@@ -104,6 +104,97 @@ export function includesFries(product) {
   return product?.categoria === "hamburguesas";
 }
 
+/* ---------------- Ingredientes ---------------- */
+
+// El orden de los grupos es el orden en que se muestran. Dentro de cada grupo, alfabético.
+export const INGREDIENT_GROUPS = [
+  { id: "pan", label: "Pan" },
+  { id: "carne", label: "Carne" },
+  { id: "aderezos", label: "Aderezos y agregados" },
+];
+
+export const INGREDIENT_CATALOG = {
+  pan: ["Pan brioche", "Pan brioche especial"],
+  carne: ["Carne 100% tapa de asado"],
+  aderezos: [
+    "Bacon",
+    "BBQ",
+    "Cebolla",
+    "Cebolla crispy",
+    "Cebolla morada",
+    "Cheddar",
+    "El mix de 1000 granos",
+    "Huevo",
+    "Lechuga",
+    "Lechuga repollada",
+    "Mayonesa de chimichurri",
+    "Mostaza",
+    "Panceta",
+    "Panceta crocante",
+    "Pepinillos",
+    "Salsa especial",
+    "Salsa Staker",
+    "Tomate",
+  ],
+};
+
+const MAX_INGREDIENT_NAME = 40;
+const MAX_INGREDIENTS_PER_GROUP = 30;
+const ingredientCollator = new Intl.Collator("es", { sensitivity: "base" });
+
+export function ingredientKey(name) {
+  return slugText(name).replace(/\s+/g, " ");
+}
+
+/** Lista sin repetidos (ignora mayúsculas y acentos) y en orden alfabético. */
+export function sortIngredientNames(list) {
+  const seen = new Map();
+  for (const item of Array.isArray(list) ? list : Object.values(list || {})) {
+    const name = String(item ?? "").trim().replace(/\s+/g, " ").slice(0, MAX_INGREDIENT_NAME);
+    const key = ingredientKey(name);
+    if (key && !seen.has(key)) seen.set(key, name);
+  }
+  return [...seen.values()].sort(ingredientCollator.compare);
+}
+
+export function cleanIngredients(raw) {
+  const out = {};
+  for (const { id } of INGREDIENT_GROUPS) out[id] = sortIngredientNames(raw?.[id]).slice(0, MAX_INGREDIENTS_PER_GROUP);
+  return out;
+}
+
+export function hasIngredients(raw) {
+  const clean = cleanIngredients(raw);
+  return INGREDIENT_GROUPS.some(({ id }) => clean[id].length > 0);
+}
+
+/** Texto para la carta: pan, carne y después aderezos en orden alfabético. */
+export function ingredientsText(raw) {
+  const clean = cleanIngredients(raw);
+  const names = INGREDIENT_GROUPS.flatMap(({ id }) => clean[id]);
+  return names.length ? `${names.join(", ")}.` : "";
+}
+
+/* ---------------- Zonas de envío ---------------- */
+
+// Cada zona lee su costo del campo indicado en datos (lo carga el dueño en el panel).
+export const SHIPPING_ZONES = [
+  { id: "ciudad", label: "Dentro de Chajarí", field: "costoEnvio" },
+  { id: "fuera", label: "Fuera de la ciudad (Ruta)", field: "costoEnvioFuera" },
+];
+
+export function shippingZone(id) {
+  return SHIPPING_ZONES.find((z) => z.id === id) || SHIPPING_ZONES[0];
+}
+
+/** Costo de la zona: número, o null si todavía está a confirmar. */
+export function shippingCost(datos, zoneId) {
+  const costo = datos?.[shippingZone(zoneId).field];
+  if (costo === null || costo === undefined || costo === "") return null;
+  const n = Number(costo);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
 /* ---------------- Medios de pago ---------------- */
 
 export const PAYMENT_METHODS = [

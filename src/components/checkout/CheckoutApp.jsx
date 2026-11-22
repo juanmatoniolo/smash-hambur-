@@ -6,7 +6,7 @@ import { WhatsAppIcon } from "@/components/BrandIcons";
 import { priceCart } from "@/components/menu/CartBar";
 import { useOpenStatus } from "@/components/menu/Hero";
 import { clearCart, useCart } from "@/lib/cart";
-import { envioLabel, formatPrice, waNumber, whatsappOrderUrl } from "@/lib/site";
+import { envioLabel, formatPrice, shippingCost, shippingZone, waNumber, whatsappOrderUrl } from "@/lib/site";
 import BuyerForm from "./BuyerForm";
 import CartLine from "./CartLine";
 import { buildOrderMessage } from "./message";
@@ -16,6 +16,7 @@ const BUYER_KEY = "comprador";
 const EMPTY_BUYER = {
   nombre: "",
   entrega: "envio",
+  zona: "ciudad",
   direccion: "",
   referencia: "",
   pago: "efectivo",
@@ -35,11 +36,13 @@ export default function CheckoutApp({ data }) {
 
   // Recordar nombre y dirección en este dispositivo.
   useEffect(() => {
+    // Una sola vez: si el efecto se repite, leería lo que el guardado inicial acaba de escribir.
+    if (loaded.current) return;
     try {
       const saved = JSON.parse(localStorage.getItem(BUYER_KEY) || "null");
       // Restaurar después de hidratar (localStorage no existe en el servidor).
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (saved) setBuyer((b) => ({ ...b, nombre: saved.nombre || "", direccion: saved.direccion || "", referencia: saved.referencia || "", entrega: saved.entrega || b.entrega }));
+      if (saved) setBuyer((b) => ({ ...b, nombre: saved.nombre || "", direccion: saved.direccion || "", referencia: saved.referencia || "", entrega: saved.entrega || b.entrega, zona: shippingZone(saved.zona).id }));
     } catch {
       // sin almacenamiento disponible
     }
@@ -49,16 +52,17 @@ export default function CheckoutApp({ data }) {
   useEffect(() => {
     if (!loaded.current) return;
     try {
-      const { nombre, direccion, referencia, entrega } = buyer;
-      localStorage.setItem(BUYER_KEY, JSON.stringify({ nombre, direccion, referencia, entrega }));
+      const { nombre, direccion, referencia, entrega, zona } = buyer;
+      localStorage.setItem(BUYER_KEY, JSON.stringify({ nombre, direccion, referencia, entrega, zona }));
     } catch {
       // ignorar
     }
   }, [buyer]);
 
   const envio = buyer.entrega === "envio";
-  const envioPending = envio && datos.costoEnvio === null;
-  const total = subtotal + (envio && !envioPending ? datos.costoEnvio : 0);
+  const costoEnvio = envio ? shippingCost(datos, buyer.zona) : 0;
+  const envioPending = envio && costoEnvio === null;
+  const total = subtotal + (envioPending ? 0 : costoEnvio);
   const hasPhone = waNumber(datos.whatsapp).length > 10;
 
   function send() {
@@ -136,8 +140,8 @@ export default function CheckoutApp({ data }) {
           </div>
           {envio ? (
             <div>
-              <dt>Envío</dt>
-              <dd>{envioLabel(datos.costoEnvio)}</dd>
+              <dt>Envío {shippingZone(buyer.zona).label.charAt(0).toLowerCase() + shippingZone(buyer.zona).label.slice(1)}</dt>
+              <dd>{envioLabel(costoEnvio)}</dd>
             </div>
           ) : null}
           <div className={s.totalRow}>

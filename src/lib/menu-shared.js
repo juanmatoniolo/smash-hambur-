@@ -48,14 +48,15 @@ export function normalizeProducts(raw) {
 
 export function normalizeDatos(raw) {
   const r = raw && typeof raw === "object" ? raw : {};
-  const costo = r.costoEnvio;
+  const costoOrNull = (c) => (c === null || c === undefined || c === "" || !Number.isFinite(Number(c)) ? null : num(c));
   const redes = r.redes && typeof r.redes === "object" ? r.redes : {};
   return {
     nombre: str(r.nombre, 80),
     whatsapp: str(r.whatsapp, 30),
     direccion: str(r.direccion, 160),
     alias: str(r.alias, 60),
-    costoEnvio: costo === null || costo === undefined || costo === "" || !Number.isFinite(Number(costo)) ? null : num(costo),
+    costoEnvio: costoOrNull(r.costoEnvio),
+    costoEnvioFuera: costoOrNull(r.costoEnvioFuera),
     redes: { instagram: str(redes.instagram, 120), facebook: str(redes.facebook, 160) },
   };
 }

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Loading from "@/components/Loading";
 import { getDatos, saveDatos } from "@/lib/admin-data";
 import { authError } from "@/lib/session";
-import { envioLabel, fullAddress, instagramUrl, facebookUrl, waNumber } from "@/lib/site";
+import { SHIPPING_ZONES, envioLabel, fullAddress, instagramUrl, facebookUrl, waNumber } from "@/lib/site";
 import { useDashboard } from "./DashboardShell";
 import s from "./dashboard.module.css";
 
@@ -21,6 +21,7 @@ export default function DatosForm() {
           direccion: d.direccion || "",
           alias: d.alias || "",
           costoEnvio: d.costoEnvio === null || d.costoEnvio === undefined ? "" : String(d.costoEnvio),
+          costoEnvioFuera: d.costoEnvioFuera === null || d.costoEnvioFuera === undefined ? "" : String(d.costoEnvioFuera),
           redes: { instagram: d.redes?.instagram || "", facebook: d.redes?.facebook || "" },
         })
       )
@@ -72,17 +73,24 @@ export default function DatosForm() {
           <span>Alias para transferencias</span>
           <input className="input" value={form.alias} onChange={set("alias")} maxLength={60} placeholder="eltoro.smash" autoCapitalize="none" />
         </label>
-        <label className="field">
-          <span>Costo de envío ($)</span>
-          <input
-            className="input"
-            inputMode="numeric"
-            value={form.costoEnvio}
-            onChange={(e) => setForm((f) => ({ ...f, costoEnvio: e.target.value.replace(/\D/g, "").slice(0, 9) }))}
-            placeholder="Vacío = a confirmar"
-          />
-          <span className="hint">En la carta: {envioLabel(form.costoEnvio)}. Vacío = a confirmar, 0 = gratis.</span>
-        </label>
+        <div className="field">
+          <div className={s.row2}>
+            {SHIPPING_ZONES.map((z) => (
+              <label key={z.id} className="field">
+                <span>Envío {z.label.charAt(0).toLowerCase() + z.label.slice(1)} ($)</span>
+                <input
+                  className="input"
+                  inputMode="numeric"
+                  value={form[z.field]}
+                  onChange={(e) => setForm((f) => ({ ...f, [z.field]: e.target.value.replace(/\D/g, "").slice(0, 9) }))}
+                  placeholder="A confirmar"
+                />
+                <span className="hint">En la carta: {envioLabel(form[z.field])}</span>
+              </label>
+            ))}
+          </div>
+          <span className="hint">Vacío = a confirmar, 0 = gratis.</span>
+        </div>
       </fieldset>
 
       <fieldset className={s.card}>

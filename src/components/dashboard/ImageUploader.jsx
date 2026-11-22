@@ -1,29 +1,30 @@
 "use client";
 import { useRef, useState } from "react";
-import { ImagePlus, Link2, Trash2 } from "lucide-react";
+import { ImagePlus, Link2, Pencil, Trash2 } from "lucide-react";
 import ProductImage from "@/components/menu/ProductImage";
 import { cloudinaryConfigured, directImageUrl, uploadImage, validateImageFile, verifyImage } from "@/lib/cloudinary-client";
 import PhotoEditor from "./PhotoEditor";
 import s from "./dashboard.module.css";
 
-export default function ImageUploader({ value, onChange, local }) {
+export default function ImageUploader({ value, onChange, local, product }) {
   const input = useRef(null);
-  const [file, setFile] = useState(null);
+  const [source, setSource] = useState(null);
   const [progress, setProgress] = useState(null);
   const [error, setError] = useState("");
   const [link, setLink] = useState("");
   const [checking, setChecking] = useState(false);
   const [over, setOver] = useState(false);
   const canUpload = cloudinaryConfigured();
+  const uploading = progress !== null;
 
   function pick(f) {
     const err = validateImageFile(f);
     setError(err);
-    if (!err) setFile(f);
+    if (!err) setSource({ file: f });
   }
 
   async function upload(blob) {
-    setFile(null);
+    setSource(null);
     setError("");
     setProgress(0);
     try {
@@ -73,13 +74,19 @@ export default function ImageUploader({ value, onChange, local }) {
       >
         {value ? (
           <ProductImage src={value} alt="Foto actual" width={640} ratio="4 / 3" className={s.dropImg} />
+        ) : canUpload ? (
+          <button type="button" className={s.dropEmpty} onClick={() => input.current?.click()} disabled={uploading}>
+            <ImagePlus size={32} aria-hidden />
+            <strong>Elegí una foto</strong>
+            <span>o arrastrala acá. Después la recortás y le ponés fondo.</span>
+          </button>
         ) : (
           <div className={s.dropEmpty}>
             <ImagePlus size={32} aria-hidden />
-            <span>{canUpload ? "Arrastrá una foto o elegila" : "Pegá el link de una foto"}</span>
+            <span>Pegá el link de una foto</span>
           </div>
         )}
-        {progress !== null ? (
+        {uploading ? (
           <div className={s.progress} role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Subiendo foto">
             <span style={{ width: `${progress}%` }} />
             <em>Subiendo {progress}%</em>
@@ -87,40 +94,49 @@ export default function ImageUploader({ value, onChange, local }) {
         ) : null}
       </div>
 
-      <div className={s.uploaderActions}>
-        {canUpload ? (
-          <>
-            <input
-              ref={input}
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={(e) => {
-                pick(e.target.files?.[0]);
-                e.target.value = "";
-              }}
-            />
-            <button type="button" className="btn btn-ghost" onClick={() => input.current?.click()} disabled={progress !== null}>
-              <ImagePlus size={18} aria-hidden /> {value ? "Cambiar foto" : "Elegir foto"}
+      {canUpload ? (
+        <input
+          ref={input}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={(e) => {
+            pick(e.target.files?.[0]);
+            e.target.value = "";
+          }}
+        />
+      ) : null}
+
+      {value ? (
+        <div className={s.uploaderActions}>
+          {canUpload ? (
+            <button type="button" className="btn btn-primary" onClick={() => setSource({ src: value })} disabled={uploading}>
+              <Pencil size={17} aria-hidden /> Editar foto
             </button>
-          </>
-        ) : null}
-        {value ? (
-          <button type="button" className="btn btn-ghost" onClick={() => onChange("")}>
+          ) : null}
+          {canUpload ? (
+            <button type="button" className="btn btn-ghost" onClick={() => input.current?.click()} disabled={uploading}>
+              <ImagePlus size={18} aria-hidden /> Cambiar
+            </button>
+          ) : null}
+          <button type="button" className="btn btn-ghost" onClick={() => onChange("")} disabled={uploading}>
             <Trash2 size={18} aria-hidden /> Quitar
           </button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
-      <div className={s.linkRow}>
-        <label className="field" style={{ flex: 1 }}>
-          <span>O pegá un link (sirve Google Drive)</span>
-          <input className="input" type="url" inputMode="url" value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://..." />
-        </label>
-        <button type="button" className="btn btn-ghost" onClick={useLink} disabled={!link.trim() || checking}>
-          <Link2 size={18} aria-hidden /> {checking ? "Verificando" : "Usar"}
-        </button>
-      </div>
+      <details className={s.linkBox} open={!canUpload || undefined}>
+        <summary>Usar un link (sirve Google Drive)</summary>
+        <div className={s.linkRow}>
+          <label className="field" style={{ flex: 1 }}>
+            <span className="visually-hidden">Link de la foto</span>
+            <input className="input" type="url" inputMode="url" value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://..." />
+          </label>
+          <button type="button" className="btn btn-ghost" onClick={useLink} disabled={!link.trim() || checking}>
+            <Link2 size={18} aria-hidden /> {checking ? "Verificando" : "Usar"}
+          </button>
+        </div>
+      </details>
 
       {error ? (
         <p className="error-text" role="alert">
@@ -128,7 +144,7 @@ export default function ImageUploader({ value, onChange, local }) {
         </p>
       ) : null}
 
-      <PhotoEditor file={file} onCancel={() => setFile(null)} onDone={upload} />
+      {source ? <PhotoEditor source={source} product={product} onCancel={() => setSource(null)} onDone={upload} /> : null}
     </div>
   );
 }

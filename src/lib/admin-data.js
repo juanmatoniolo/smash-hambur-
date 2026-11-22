@@ -5,7 +5,7 @@ import { createUserWithEmailAndPassword, getAuth, inMemoryPersistence, sendPassw
 import { get, push, ref, remove, set, update } from "firebase/database";
 import { firebaseConfig, getAuthClient, getDb } from "./firebase";
 import { idToken } from "./session";
-import { CATEGORIES, MAX_BASE_MEATS, MEAT_PRICE_KEYS, MIN_MEATS, categoryOf } from "./site";
+import { CATEGORIES, INGREDIENT_GROUPS, MAX_BASE_MEATS, MEAT_PRICE_KEYS, MIN_MEATS, categoryOf, cleanIngredients, hasIngredients, ingredientsText } from "./site";
 import { MAX_FRANJAS, WEEK_ORDER, isHHMM } from "@/utils/horarios";
 
 export const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/;
@@ -48,6 +48,12 @@ export function cleanComida(raw) {
       if (Number(n) > out.medallones && v > 0) precios[k] = v;
     }
     if (Object.keys(precios).length) out.precios = precios;
+  }
+  // Con ingredientes elegidos, la descripción se arma siempre en el orden de la carta.
+  if (hasIngredients(raw.ingredientes)) {
+    const clean = cleanIngredients(raw.ingredientes);
+    out.ingredientes = Object.fromEntries(INGREDIENT_GROUPS.filter(({ id }) => clean[id].length).map(({ id }) => [id, clean[id]]));
+    out.descripcion = txt(ingredientsText(clean), 400);
   }
   return out;
 }
@@ -99,12 +105,14 @@ export async function getDatos(local) {
 
 export function cleanDatos(raw) {
   const costo = String(raw.costoEnvio ?? "").trim();
+  const costoFuera = String(raw.costoEnvioFuera ?? "").trim();
   return {
     nombre: txt(raw.nombre, 80),
     whatsapp: txt(raw.whatsapp, 30),
     direccion: txt(raw.direccion, 160),
     alias: txt(raw.alias, 60),
     costoEnvio: costo === "" ? null : money(costo),
+    costoEnvioFuera: costoFuera === "" ? null : money(costoFuera),
     redes: { instagram: txt(raw.redes?.instagram, 120), facebook: txt(raw.redes?.facebook, 160) },
   };
 }
