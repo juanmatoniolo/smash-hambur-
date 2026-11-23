@@ -118,7 +118,8 @@ export function cleanDatos(raw) {
 }
 
 export async function saveDatos(local, raw) {
-  await set(ref(getDb(), `locales/${local}/datos`), cleanDatos(raw));
+  // update: conserva las opciones de envío y pago que se editan en el panel central.
+  await update(ref(getDb(), `locales/${local}/datos`), cleanDatos(raw));
   afterSave(local);
 }
 
