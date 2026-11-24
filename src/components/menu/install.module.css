@@ -1,0 +1,48 @@
+.banner {
+  display: grid;
+  gap: 8px;
+  padding: 12px var(--gutter) 4px;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--accent-fill-hover);
+}
+
+.help {
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.desktopOnly {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .desktopOnly {
+    display: contents;
+  }
+}
+
+@media (min-width: 768px), (display-mode: standalone) {
+  .banner {
+    display: none;
+  }
+}

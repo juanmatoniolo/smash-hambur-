@@ -5,6 +5,7 @@ import CartBar from "./CartBar";
 import CategoryNav from "./CategoryNav";
 import Hero from "./Hero";
 import InfoSheet from "./InfoSheet";
+import InstallBanner from "./InstallBanner";
 import ProductRow from "./ProductRow";
 import ProductSheet from "./ProductSheet";
 import SiteFooter from "./SiteFooter";
@@ -30,6 +31,8 @@ export default function MenuApp({ data, spotlightId = null, footer = true }) {
   return (
     <div className={s.page}>
       <Hero datos={datos} horarios={horarios} onInfo={() => setInfoOpen(true)} asTitle={!spotlight} />
+
+      <InstallBanner />
 
       {spotlight ? <Spotlight product={spotlight} onOpen={setSelected} /> : null}
 

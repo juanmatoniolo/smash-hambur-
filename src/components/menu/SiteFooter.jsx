@@ -2,6 +2,7 @@ import { FacebookIcon, InstagramIcon, WhatsAppIcon } from "@/components/BrandIco
 import { SITE_NAME, facebookUrl, fullAddress, instagramUrl, mapsUrl, waNumber } from "@/lib/site";
 import InstallApp from "./InstallApp";
 import s from "./menu.module.css";
+import installStyles from "./install.module.css";
 
 export default function SiteFooter({ datos }) {
   const ig = instagramUrl(datos.redes.instagram);
@@ -35,7 +36,9 @@ export default function SiteFooter({ datos }) {
           </a>
         ) : null}
       </div>
-      <InstallApp />
+      <div className={installStyles.desktopOnly}>
+        <InstallApp />
+      </div>
     </footer>
   );
 }
